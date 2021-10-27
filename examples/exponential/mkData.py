@@ -1,9 +1,8 @@
-# %%
+
 import numpy as np
 import yoda, random
 import os
 import apprentice as app
-# %%
 
 """
 Exponential Distribution
@@ -107,4 +106,4 @@ make_target_scatter(funcs)
 
 
 
-# %%
+
