@@ -1,16 +1,22 @@
-
+# %%
 import numpy as np
 import yoda, random
 import os
-import apprentice as app
-
+import sys
+import h5py
+#import apprentice as app
+# %%
+# fname = "inputdata.h5"
+# f = h5py.File(fname, "r")
+# print(f)
+# %%
 """
 Exponential Distribution
 """
 
-NPOINTS = 100000
-n_bins = 20
-noise = 20/100 #not implemented
+NPOINTS = 10
+n_bins = 10
+noise = 20/100 
 x_min = 0
 x_max = 3
 
@@ -25,7 +31,12 @@ NTARGETPOINTS = 100000
 a_target = 1.4
 b_target = -1.1
 
-np.random.seed(100)
+add_error = False
+if(len(sys.argv) > 1):
+    add_error = bool(sys.argv[1])
+print("running mkData with error: ", add_error)
+
+np.random.seed()
 
 
 
@@ -50,19 +61,31 @@ def make_histos(funcs, a, b, run_num):
 
     #fill each histogram with data from NPOINTS # of xs
     x = x_min + (x_max - x_min) * np.random.random_sample(NPOINTS)
+    #histogram from exponential and with error
     h = []
+    h_err = []
     for i in range(len(funcs)):
         h.append(yoda.Histo1D(n_bins, 0.0, 1.0, "func" + str(i)))
         for j in range(NPOINTS):
             h[i].fill(funcs[i](a, b, x[j]))
-    yoda.write(h, 'MC/' + folder + '/combined.yoda')
+        if add_error:
+            h_err.append(yoda.Histo1D(n_bins, 0.0, 1.0, "func" + str(i)))
+            for bin in h[i].bins():
+                err_val = bin.height()*(1 + noise*np.random.randn(1))
+                #print(err_val, "  ", bin.height())
+                for k in range(int(err_val)):
+                    h_err[i].fill(bin.xMid())
+        
+    if add_error:
+        yoda.write(h_err, 'MC/' + folder + '/combined.yoda')
+    else:
+        yoda.write(h, 'MC/' + folder + '/combined.yoda')
 
-    #add error
-    for b in h[0].bins():
-        print(help(b))
-        print(b.height())
-        #b.height = b.height()*(1 + noise*np.random.randn(1))
-        print(b.height())
+    # #add error
+    # for b in h[0].bins():
+    #     print(b.height())
+    #     #b.height = b.height()*(1 + noise*np.random.randn(1))
+    #     print(b.height())
     # for i in range(h.numBins):
     #     b.bin(i).height = b.bin(i).height (1 + noise*np.random.randn(1))
 
@@ -89,8 +112,8 @@ funcs = [func1, func2]
 a = a_min
 b = b_min
 runNum = 0
-while a <= a_max:
-    while b <= b_max:
+while a <= a_max + 0.00001: #fix floating point errors
+    while b <= b_max + 0.00001:
         make_histos(funcs, a, b, runNum)
         b += b_incr
         runNum += 1
@@ -107,3 +130,5 @@ make_target_scatter(funcs)
 
 
 
+
+# %%

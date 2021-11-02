@@ -1,5 +1,5 @@
 warning in stationary: failed to import cython module: falling back to numpy
 warning in coregionalize: failed to import cython module: falling back to numpy
 warning in choleskies: failed to import cython module: falling back to numpy
-/func0	1.0 # 20 bins
-/func1	1.0 # 20 bins
+/func0	1.0 # 10 bins
+/func1	1.0 # 10 bins
