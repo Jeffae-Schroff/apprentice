@@ -10,8 +10,9 @@ if __name__ == "__main__":
     op = optparse.OptionParser(usage=__doc__)
     op.add_option("-v", "--debug", dest="DEBUG", action="store_true", default=False, help="Turn on some debug messages")
     op.add_option("-o", dest="OUTPUT", default="approx.json", help="Output filename (default: %default)")
-    op.add_option("-w", dest="WEIGHTS", default=None, help="Obervable file (default: %default)")
+    op.add_option("-w", dest="WEIGHTS", default=None, help="Observable file (default: %default)")
     op.add_option("-s", dest="SEED", type=int, default=1234, help="Random seed (default: %default)")
+    op.add_option("--sample", dest="SAMPLE", type=int, default=-1, help="Number of runs to sample (default: %default)")
     op.add_option("--order", dest="ORDER", default=None, help="Polynomial orders of numerator and denominator, comma separated (default: %default)")
     op.add_option("--mode", dest="MODE", default="sip", help="Base algorithm  --- la |sip|lasip --- (default: %default)")
     op.add_option("--errs", dest="ERRS", action='store_true', default=False, help="Build approximations for errors, (default is for values)")
@@ -73,8 +74,35 @@ if __name__ == "__main__":
     import datetime
     binedges = {}
     dapps = {}
+
+    # Determine how many randomly selected runs to use (default is all runs)
+    num_runs = len(DATA[0][0])
+    in_sample = [True for i in range(num_runs)]
+
+    if (opts.SAMPLE != int(opts.SAMPLE) or opts.SAMPLE == 0 or opts.SAMPLE > num_runs):
+        print("Sampling {} runs from {} MC data runs was invalid, exiting.".format(opts.SAMPLE, num_runs))
+        sys.exit(1)
+    elif (opts.SAMPLE > 0 or opts.SAMPLE >= num_runs): #valid number of sample_runs
+        sys.stdout.write("Using "+str(opts.SAMPLE)+" of "+str(num_runs)+" runs from MC data")
+        sys.stdout.flush()
+        # get the right number of True elements in in_sample
+        in_sample[opts.SAMPLE:] = [False for i in range(num_runs-opts.SAMPLE)]
+        rng = np.random.default_rng(opts.SEED)
+        rng.shuffle(in_sample, axis = 0)
+
+    # if(opts.SAMPLE < 0):
+    # counts as opts.SAMPLE = num_runs, no change in behavior
+
     for num, (X, Y, E) in  enumerate(DATA):
         thisBinId = binids[num]
+        
+        oldX, oldY, oldE = X, Y, E
+        X, Y, E = [], [], []
+        for i in range(len(oldX)):
+            if in_sample[i]:
+                X.append(oldX[i])
+                Y.append(oldY[i])
+                E.append(oldE[i])
 
         if rank==0 or rank==size-1:
             if ((num+1)%opts.MSGEVERY ==0):
