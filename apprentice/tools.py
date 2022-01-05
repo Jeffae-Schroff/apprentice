@@ -306,15 +306,15 @@ def gradientRecursion(X, struct, jacfac):
     jacfac ... jacobian factor
     returns array suitbale for multiplication with coefficient vector
     """
-    import numpy as np
+    import jax.numpy as jnp
     dim = len(X)
-    REC = np.zeros((dim, len(struct)))
-    _RR = np.power(X, struct)
+    REC = jnp.zeros((dim, len(struct)))
+    _RR = jnp.power(X, struct)
     for coord in range(dim):
-        nonzero = np.where(struct[:, coord] != 0)
-        RR = np.copy(_RR[nonzero])
-        RR[:, coord] = jacfac[coord] * struct[nonzero][:, coord] * np.power(X[coord], struct[nonzero][:, coord] - 1)
-        REC[coord][nonzero] = np.prod(RR, axis=1)
+        nonzero = jnp.where(struct[:, coord] != 0)
+        RR = jnp.copy(_RR[nonzero])
+        RR[:, coord] = jacfac[coord] * struct[nonzero][:, coord] * jnp.power(X[coord], struct[nonzero][:, coord] - 1)
+        REC[coord][nonzero] = jnp.prod(RR, axis=1)
     return REC
 
 @jit(forceobj=True, parallel=True)

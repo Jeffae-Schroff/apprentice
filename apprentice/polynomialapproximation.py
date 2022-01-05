@@ -230,18 +230,18 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
 
 
     def gradient(self, X):
-        import numpy as np
-        struct = np.array(self._struct_p, dtype=np.float)
-        X = self._scaler.scale(np.array(X))
+        import jax.numpy as jnp
+        struct = jnp.array(self._struct_p, dtype=np.float)
+        X = self._scaler.scale(jnp.array(X))
 
         if self.dim==1:
-            struct[1:]=self._scaler.jacfac[0]*struct[1:]*np.power(X, struct[1:]-1)
-            return np.dot(np.atleast_2d(struct),self._pcoeff)
+            struct[1:]=self._scaler.jacfac[0]*struct[1:]*jnp.power(X, struct[1:]-1)
+            return jnp.dot(jnp.atleast_2d(struct),self._pcoeff)
 
         from apprentice.tools import gradientRecursion
         GREC = gradientRecursion(X, struct, self._scaler.jacfac)
 
-        return np.sum(GREC * self._pcoeff, axis=1)
+        return jnp.sum(GREC * self._pcoeff, axis=1)
 
     def hessian(self, X):
         import numpy as np

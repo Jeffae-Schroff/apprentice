@@ -12,7 +12,7 @@ NTARGETPOINTS = 100000
 a_target = 1.5
 b_target = -1
 n_bins = 20
-print("Target: a = "+str(a_target)+", b = "+str(b_target))
+#print("Target: a = "+str(a_target)+", b = "+str(b_target))
 
 
 #domain/range for

@@ -5,11 +5,11 @@ python3 data_scripts/add_err.py
 app-datadirtojson Data -o data.json
 
 start=$(date +%s)
-num_runs=1000
+num_runs=30
 python3 data_scripts/new_many_tunes.py
 for ((i=1; i <= $num_runs; i++))
 do 
-    app-build inputdata.h5  --order 3,0 --sample 30 -s $i -o val_30.json
+    app-build inputdata.h5  --order 2,0 --sample 30 -s $i -o val_30.json
     app-build inputdata.h5  --order 2,0 --sample 30 -s $i -o err_20.json --errs
     app-yodaenvelope val_30.json -o mytune/envelope
     app-ls val_30.json -w > myweights.txt
