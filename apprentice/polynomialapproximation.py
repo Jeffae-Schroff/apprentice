@@ -243,12 +243,13 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
             _row = np.array(pdict['cov_row'])
             _col = np.array(pdict['cov_col'])
             _data = np.array(pdict['cov_data'])
-            data = np.hstack([_data, _data])
-            row = np.hstack([_row, _col])
-            col = np.hstack([_col, _row])
-            self._cov = coo_matrix((data, (row, col)))
-            self._cov.setdiag(self._cov.diagonal()*0.5)
-            self._cov = self._cov.toarray()
+            if len(_row) > 0 and len(_col) > 0:
+                data = np.hstack([_data, _data])
+                row = np.hstack([_row, _col])
+                col = np.hstack([_col, _row])
+                self._cov = coo_matrix((data, (row, col)))
+                self._cov.setdiag(self._cov.diagonal()*0.5)
+                self._cov = self._cov.toarray()
             
 
     def fmin(self, nsamples=1, nrestart=1, use_grad=False):
