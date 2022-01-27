@@ -60,7 +60,8 @@ def denomChangesSignMS(rapp, multistart=10):
     else:   return False, xmin, xmax
 
 
-def calcApprox(X, Y, order, pnames, mode= "sip", onbtol=-1, debug=False, testforPoles=100, ftol=1e-9, itslsqp=200, computecov=False):
+def calcApprox(X, Y, order, pnames, mode= "sip", onbtol=-1, debug=False,
+    testforPoles=100, ftol=1e-9, itslsqp=200, computecov=False):
     M, N = order
     import apprentice as app
     if N==0:
