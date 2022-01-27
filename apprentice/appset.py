@@ -191,7 +191,11 @@ class AppSet(object):
         vals = np.sum(MM, axis=1)
         if self._hasRationals:
             den = np.sum(self._maxrec * self._QC[sel], axis=1)
-            vals[self._mask[sel]] /= den[self._mask[sel]]
+            vals/=den
+            # FIXME this logic with the mask is not working
+            # The code will divide by zero in case we hav mixed bits here
+            # Note that this will go away come federations
+            # vals[self._mask[sel]] /= den[self._mask[sel]]
         return vals
 
     def grads(self, x, sel=slice(None, None, None), set_cache=True):
@@ -290,7 +294,7 @@ class TuningObjective2(object):
         NOTE that hnames is in fact an array of strings repeating the histo name for each corresp bin
         """
         weights = []
-        for hn in self._hnames[self._good]: weights.append(wdict[hn])
+        for hn in self._hnames: weights.append(wdict[hn])
         self._W2 = np.array([w * w for w in np.array(weights)], dtype=np.float64)
 
     def setLimitsAndFixed(self, fname):
@@ -379,7 +383,7 @@ class TuningObjective2(object):
         self._E = E[good]
         self._Y = Y[good]
         self._W2 = np.array([w * w for w in np.array(weights[nonzero])[good]], dtype=np.float64)
-        self._hnames = np.array([b.split("#")[0]  for b in AS._binids[nonzero]])
+        self._hnames = np.array([b.split("#")[0]  for b in self._binids])
         # Add in error approximations
         if f_errors is not None:
             EAS = AppSet(f_errors)
