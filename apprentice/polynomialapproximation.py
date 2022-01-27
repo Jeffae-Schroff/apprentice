@@ -19,7 +19,9 @@ def timeit(method):
 
 from sklearn.base import BaseEstimator, RegressorMixin
 class PolynomialApproximation(BaseEstimator, RegressorMixin):
-    def __init__(self, X=None, Y=None, order=2, fname=None, initDict=None, strategy=2, scale_min=-1, scale_max=1, pnames=None, set_structures=True, computecov=False):
+    def __init__(
+        self, X=None, Y=None, order=2, fname=None, initDict=None,
+        strategy=2, scale_min=-1, scale_max=1, pnames=None, set_structures=True, computecov=False):
         """
         Multivariate polynomial approximation
 
@@ -126,7 +128,7 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         # NOTE, strat 1 is faster for smaller problems (Npoints < 250)
         else: raise Exception("fit() strategy %i not implemented"%strategy)
 
-        if kwargs.get("computecov") is not False:
+        if kwargs.get("computecov"):
             cov = np.linalg.inv(VM.T@VM)
             if VM.shape[0] <= VM.shape[1]:
                 raise ValueError("the number of MC runs {} must larger than the number of weights {}".format(*VM.shape))
