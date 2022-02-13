@@ -92,7 +92,7 @@ if __name__ == "__main__":
         rng.shuffle(in_sample, axis = 0)
     # if(opts.SAMPLE < 0):
     # counts as opts.SAMPLE = num_runs, no change in behavior
-    
+
     for num, (X, Y, E) in  enumerate(DATA):
         thisBinId = binids[num]
 
@@ -111,6 +111,7 @@ if __name__ == "__main__":
                 ttg = tel*(len(DATA)-num)/(num+1)
                 eta = now + ttg
                 eta = datetime.datetime.fromtimestamp(now + ttg)
+                #may be inaccurate if using sample option
                 sys.stdout.write("{}[{}] {}/{} (elapsed: {:.1f}s, to go: {:.1f}s, ETA: {})\r".format(80*" " if rank>0 else "", rank, num+1, len(DATA), tel, ttg, eta.strftime('%Y-%m-%d %H:%M:%S')) ,)
                 sys.stdout.flush()
         # USE = np.where( (_Y>0) ) if opts.ISLOG else np.where( (_E>=0) )

@@ -120,7 +120,8 @@ APP   = args[2]
 np.random.seed(opts.SEED)
 
 if opts.objective is None:
-    GOF = app.appset.TuningObjective2(WFILE, DATA, APP, f_errors=opts.ERRAPP, debug=opts.DEBUG, computecov=opts.computecov)
+    # print("computecov: ", opts.computecov)
+    GOF = app.appset.TuningObjective3(WFILE, DATA, APP, f_errors=opts.ERRAPP, debug=opts.DEBUG, computecov=opts.computecov)
 else:
     GOF = loadPlugin(opts.objective, WFILE, DATA, APP, f_errors=opts.ERRAPP, debug=opts.DEBUG)
 
