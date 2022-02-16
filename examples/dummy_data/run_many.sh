@@ -1,7 +1,4 @@
 #!/bin/bash 
-#SBATCH --nodes=1
-#SBATCH --time=4:00:00
-#SBATCH --account=run_many
 python3 data_scripts/mk_data.py
 app-yoda2h5 MC --pname used_params -o inputdata.h5
 python3 data_scripts/add_err.py
