@@ -4,8 +4,8 @@ app-yoda2h5 MC --pname used_params -o inputdata.h5
 python3 data_scripts/add_err.py
 app-datadirtojson Data -o data.json
 
-experiment_name="cov_2_exp_func"
-num_runs=1000
+experiment_name="cov_testing"
+num_runs=2
 
 start=$(date +%s)
 python3 data_scripts/new_many_tunes.py

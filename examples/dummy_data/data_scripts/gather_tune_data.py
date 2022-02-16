@@ -5,7 +5,7 @@ import sys
 #starts reading at line 9 of minimum_tnc_1_1.txt in the folder
 
 if len(sys.argv) != 2:
-    print('invalid arguments to gather_data.py')
+    print('invalid arguments to gather_tune_data.py')
 
 filename = sys.argv[1]
 

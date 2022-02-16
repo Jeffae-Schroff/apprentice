@@ -3,92 +3,63 @@ import numpy as np
 import yoda
 import os
 import shutil
+import set_experiment_values as vals
 """
 Exponential Distribution
 """
-#pnames only implemented for inputdata_gen_params
-pnames = ['a', 'b']
-NPOINTS = 100000
-NTARGETPOINTS = 100000
-a_target = 1.5
-b_target = -1
-n_bins = 20
-#print("Target: a = "+str(a_target)+", b = "+str(b_target))
 
-
-#domain/range for
-#observable funcs
-x_min = [0,0]
-x_max = [3,3]
-y_min = [0,0]
-y_max = [4,4]
-
-# # Parameter values for MC
-a_min = 1
-a_max = 2
-a_incr = 0.2
-b_min = -1.2
-b_max = -0.8
-b_incr = 0.4/6
-
-np.random.seed()
-
-#exponential functions used
-def func1(x, a, b):
-    return np.exp(a*x+b*x**2)
-
-def func2(x, a, b):
-    return np.exp(a*x+b*x**3)
-
-def num_events(a, b):
-    return 20-5*a
-
-#a-b goes from 1.8 to 3.4
-def observation_error(x, a, b):
-    return x*10*(a - b)/100
 
 #Write generation data to file
 
 def main():
-    #make MC folder
     if(os.path.isdir('MC')):
         shutil.rmtree('MC') 
     os.mkdir('MC/')
+    if(os.path.isdir('Data')):
+        shutil.rmtree('Data') 
+    os.mkdir('Data/')
 
-    funcs = [func1, func2]
-    a = a_min
-    b = b_min
-    runNum = 0
-    while a <= a_max + 0.00001: #fix floating point errors
-        while b <= b_max + 0.00001:
-            make_histos(funcs, a, b, runNum)
-            b += b_incr
-            runNum += 1
-        b = b_min
-        a += a_incr
+    np.random.seed(42) #Change this to pick different param value samples
+    run_params = np.ndarray([len(vals.funcs), vals.num_folders])
+    for i in range(len(vals.funcs)):
+        run_params[i,:] = vals.p_min[i] + (vals.p_max[i] - vals.p_min[i])*np.random.rand(vals.num_folders)
+    for j in range(vals.num_folders):
+        make_histos(run_params[:,j], j)
+
+    # funcs = [vals.func1, vals.func2]
+    # a = vals.a_min
+    # b = vals.b_min
+    # runNum = 0
+    # while a <= vals.a_max + 0.00001: #fix floating point errors
+    #     while b <= vals.b_max + 0.00001:
+    #         make_histos(funcs, [a, b], runNum)
+    #         b += vals.b_incr
+    #         runNum += 1
+    #     b = vals.b_min
+    #     a += vals.a_incr
 
     #make Data folder
-    make_target_scatter(funcs)
+    make_target_scatter(vals.funcs)
 
 
 #writes Histo1D of funcs with given params to .yoda file one subfolder
-def make_histos(funcs, a, b, run_num):
+def make_histos(params, run_num):
     folder = str(run_num).zfill(6)
     os.mkdir('MC/' + folder)
     file = open('MC/' + folder + '/used_params', 'w')
-    file.write('a ' + str(a) + '\n')
-    file.write('b ' + str(b))
+    for i in range(len(vals.pnames)):
+        file.write(vals.pnames[i]+' '+str(params[i])+'\n')
     file.close()
 
     #histogram from exponential
     h = []
-    event_weight = num_events(a, b)/NPOINTS
-    for i in range(len(funcs)):
-        h.append(yoda.Histo1D(n_bins, y_min[i], y_max[i], "func" + str(i)))
+    event_weight = vals.num_events(params)/vals.NPOINTS
+    for i in range(len(vals.funcs)):
+        h.append(yoda.Histo1D(vals.n_bins, vals.y_min[i], vals.y_max[i], "func" + str(i)))
         #fill each histogram with data from NPOINTS # of xs
-        x = x_min[i] + (x_max[i] - x_min[i]) * np.random.random_sample(NPOINTS)
-        y = funcs[i](x, a, b)
-        for j in range(NPOINTS):
+        x = vals.x_min[i] + (vals.x_max[i] - vals.x_min[i]) * np.random.random_sample(vals.NPOINTS)
+        y = vals.funcs[i](x, params)
+        for j in range(vals.NPOINTS):
             h[i].fill(y[j], event_weight)
         
     yoda.write(h, 'MC/' + folder + '/combined.yoda')
@@ -96,12 +67,12 @@ def make_histos(funcs, a, b, run_num):
 #makes Scatter2D plots for each function with the target parameters
 def make_target_scatter(funcs):
     s = []
-    event_weight = num_events(a_target, b_target)/NTARGETPOINTS
+    event_weight = vals.num_events(vals.targets)/vals.NTARGETPOINTS
     for i in range(len(funcs)):
-        h = yoda.Histo1D(n_bins, y_min[i], y_max[i], "func" + str(i))
-        x = x_min[i] + (x_max[i] - x_min[i]) * np.random.random_sample(NTARGETPOINTS)
-        y = funcs[i](x, a_target, b_target)
-        for j in range(NTARGETPOINTS):
+        h = yoda.Histo1D(vals.n_bins, vals.y_min[i], vals.y_max[i], "func" + str(i))
+        x = vals.x_min[i] + (vals.x_max[i] - vals.x_min[i]) * np.random.random_sample(vals.NTARGETPOINTS)
+        y = funcs[i](x, vals.targets)
+        for j in range(vals.NTARGETPOINTS):
             h.fill(y[j], event_weight)
         s.append(h.mkScatter())
     

@@ -1,7 +1,7 @@
 # %%
 import h5py
 import numpy as np
-from mk_data import observation_error
+from set_experiment_values import observation_error
 # %%
 #make this a parameter? perhaps not important
 f = h5py.File("inputdata.h5", "r+")

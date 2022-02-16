@@ -3,6 +3,7 @@ import os
 import numpy as np
 import statistics
 import matplotlib.pyplot as plt
+import set_experiment_values as const
 #prints stats of given file in many_tunes
 #assumes first row is names of parameters, rest are values in columns
 #Also generates histograms
@@ -24,8 +25,6 @@ file_output = np.array([f.split() for f in file_lines])
 
 params = file_output[0]
 
-param_range = [(1,2), (-1.2, -0.8)] #TODO: read from file instead of hardcode uggh probably means changing format too
-param_range = [(1.45, 1.55), (-1.02, -0.98)]
 vals = []
 filtered_vals = []
 boundary= []
@@ -34,7 +33,7 @@ for i in range(len(params)):
     boundary_num = 0
     filtered_val = []
     for j in range(len(vals[i])):
-        if filter and (vals[i][j] == param_range[i][0] or vals[i][j] == param_range[i][1]):
+        if filter and (vals[i][j] == const.p_min[i] or vals[i][j] == const.p_max[i]):
             boundary_num += 1
         else:
             filtered_val.append(vals[i][j])
@@ -53,15 +52,21 @@ for i in range(len(params)):
         boundary_proportion = "Did not filter"
     print(params[i].ljust(20), str(mean).ljust(20), str(stdev).ljust(20), boundary_proportion)
 
-
-
+# zoom into the graph by this factor
+zoom = 20
 for i in range(len(params)):
     plt.figure()
     title = filename
-    if filter:
+    if zoom != 1:
+        title += " x" + str(zoom)
+    if filter and boundary[i] != 0:
         title += " (" + str(boundary[i]) + " boundary values excluded)"
-    
-    plt.hist(filtered_vals[i], bins=30, range = param_range[i])
+
+    mid = (const.p_max[i] + const.p_min[i]) / 2.0
+    span = (const.p_max[i] - const.p_min[i]) / zoom
+    plot_range = [mid - span/2, mid + span/2]
+
+    plt.hist(filtered_vals[i], bins=30, range = plot_range)
     plt.title(title)
     plt.xlabel(params[i] + " value")
     plt.ylabel("Frequency")
