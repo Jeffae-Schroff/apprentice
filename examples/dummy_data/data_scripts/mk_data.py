@@ -55,7 +55,7 @@ def make_histos(params, run_num):
     h = []
     event_weight = vals.num_events(params)/vals.NPOINTS
     for i in range(len(vals.funcs)):
-        h.append(yoda.Histo1D(vals.n_bins, vals.y_min[i], vals.y_max[i], "func" + str(i)))
+        h.append(yoda.Histo1D(vals.nbins, vals.y_min[i], vals.y_max[i], "func" + str(i)))
         #fill each histogram with data from NPOINTS # of xs
         x = vals.x_min[i] + (vals.x_max[i] - vals.x_min[i]) * np.random.random_sample(vals.NPOINTS)
         y = vals.funcs[i](x, params)
@@ -69,7 +69,7 @@ def make_target_scatter(funcs):
     s = []
     event_weight = vals.num_events(vals.targets)/vals.NTARGETPOINTS
     for i in range(len(funcs)):
-        h = yoda.Histo1D(vals.n_bins, vals.y_min[i], vals.y_max[i], "func" + str(i))
+        h = yoda.Histo1D(vals.nbins, vals.y_min[i], vals.y_max[i], "func" + str(i))
         x = vals.x_min[i] + (vals.x_max[i] - vals.x_min[i]) * np.random.random_sample(vals.NTARGETPOINTS)
         y = funcs[i](x, vals.targets)
         for j in range(vals.NTARGETPOINTS):

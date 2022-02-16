@@ -1,40 +1,41 @@
 import numpy as np
 
+nparams = 2
 pnames = ['a', 'b']
 NPOINTS = 100000
 NTARGETPOINTS = 100000
-targets = [1.5, -1]
-n_bins = 20
+targets = [1, 0.5]
+nbins = 20
 
-#domain/range for
-#observable funcs
-x_min = [0,0]
-x_max = [3,3]
+#domain/range for observable funcs
+x_min = [-2,-3]
+x_max = [4,5]
 y_min = [0,0]
-y_max = [4,4]
+y_max = [1.5,1.5]
 
 #exponential functions used
 def func1(x, params):
     a, b = params[0], params[1]
-    return np.exp(a*x+b*x**2)
+    return np.exp(-((x-a)**2/(2*b)**2))
 
 def func2(x, params):
     a, b = params[0], params[1]
-    return np.exp(a*x+b*x**3)
-
-
+    return np.exp(-((x-a)**4/(2*b)**2))
 
 num_folders = 42
 funcs = [func1, func2]
-p_min = [1,-1.2]
-p_max = [2,-0.8]
+p_min = [0,0.1]
+p_max = [2,1]
 
-if not len(pnames) == len(targets) == len(x_min) == len(x_max) == len(y_min) == len(y_max) == len(funcs) == len(p_min) == len(p_max):
-    print("error in set_experiment_values.py: vals not same length")
-
+#total area of histogram in params' folder
 def num_events(params):
-    return 20-5*params[0]
+    a, b = params[0], params[1]
+    return 20-5*a
 
-#a-b goes from 1.8 to 3.4
-def observation_error(x, a, b):
-    return x*10*(a - b)/100
+#goes from 1-30%
+def observation_error(x, params):
+    a, b = params[0], params[1]
+    return x*10*(a + b)/100
+
+if not nparams == len(pnames) == len(targets) == len(x_min) == len(x_max) == len(y_min) == len(y_max) == len(funcs) == len(p_min) == len(p_max):
+    print("\n\n\nerror in set_experiment_values.py: vals not same length\n\n\n")
