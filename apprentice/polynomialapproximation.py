@@ -36,16 +36,22 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         self._vmax=None
         self._xmin=None
         self._xmax=None
+        self._cov=None
         if initDict is not None:
             self.mkFromDict(initDict, set_structures=set_structures)
         elif fname is not None:
             self.mkFromJSON(fname, set_structures=set_structures)
         elif X is not None and Y is not None:
+            X = np.array(X, dtype=np.float64)
+            Y = np.array(Y, dtype=np.float64)
+            bad_data = (Y == apprentice.io.INVALID_NUMBER)
+            X = X[~bad_data]
+            Y = Y[~bad_data]
             self._m=order
-            self._scaler = apprentice.Scaler(np.atleast_2d(np.array(X, dtype=np.float64)), a=scale_min, b=scale_max, pnames=pnames)
+            self._scaler = apprentice.Scaler(np.atleast_2d(X), a=scale_min, b=scale_max, pnames=pnames)
             self._X   = self._scaler.scaledPoints
             self._dim = self._X[0].shape[0]
-            self._Y   = np.array(Y, dtype=np.float64)
+            self._Y   = Y
             self._trainingsize=len(X)
             if self._dim==1: self.recurrence=apprentice.monomial.recurrence1D
             else           : self.recurrence=apprentice.monomial.recurrence
@@ -88,6 +94,8 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         # Given A = U Sigma VT, for A x = b, x = V Sigma^-1 UT b
         temp = np.dot(U.T, self._Y.T)[0:S.size]
         self._pcoeff = np.dot(V.T, 1./S * temp)
+        epsilon = self._Y - np.dot(VM, self._pcoeff)
+        self._resids = np.dot(epsilon.T, epsilon)
 
     # @timeit
     def coeffSolve2(self, VM):
@@ -97,6 +105,7 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         rcond = -1 if np.version.version < "1.15" else None
         x, res, rank, s  = np.linalg.lstsq(VM, self._Y, rcond=rcond)
         self._pcoeff = x
+        self._resids = res
 
     def fit(self, **kwargs):
         """
@@ -112,12 +121,17 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         from apprentice import monomial
         VM = monomial.vandermonde(self._X, self.m)
         strategy=kwargs["strategy"] if kwargs.get("strategy") is not None else 1
-        if kwargs.get("computecov") is not False:
-            self._cov = np.linalg.inv(2*VM.T@VM)
         if   strategy==1: self.coeffSolve( VM)
         elif strategy==2: self.coeffSolve2(VM)
         # NOTE, strat 1 is faster for smaller problems (Npoints < 250)
         else: raise Exception("fit() strategy %i not implemented"%strategy)
+
+        if kwargs.get("computecov") is not False:
+            cov = np.linalg.inv(VM.T@VM)
+            if VM.shape[0] <= VM.shape[1]:
+                raise ValueError("the number of MC runs {} must larger than the number of weights {}".format(*VM.shape))
+            fac = self._resids / (VM.shape[0]-VM.shape[1])
+            self._cov = cov*fac
 
     def predict(self, X):
         """
@@ -150,6 +164,16 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
             rec_p = np.power(XS, self._struct_p[:, np.newaxis])
         return self._pcoeff.dot(rec_p)
 
+    def predictWithError(self, X):
+        X=self._scaler.scale(np.array(X))
+        rec_p = np.array(self.recurrence(X, self._struct_p))
+        yhat = np.dot(rec_p, self._pcoeff)
+        yerr = 0
+        if self._cov is not None:
+            yerr = np.matmul(rec_p, np.matmul(self._cov, rec_p.transpose()))
+            yerr = np.sqrt(yerr)
+        return yhat, yerr
+
 
     def __call__(self, X):
         """
@@ -178,6 +202,13 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         if self._vmax is not None: d["vmax"] = self._vmax
         if self._xmin is not None: d["xmin"] = self._xmin
         if self._xmax is not None: d["xmax"] = self._xmax
+        if self._cov is not None:
+            from scipy.sparse import tril
+            # because covariance matrix is symmetric, only save lower triangle part
+            cov_tril = tril(self._cov)
+            d['cov_row'] = cov_tril.row.tolist()
+            d['cov_col'] = cov_tril.col.tolist()
+            d['cov_data'] = cov_tril.data.tolist()
         return d
 
     def save(self, fname):
@@ -207,6 +238,18 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
             pass
         if set_structures:
             self.setStructures()
+        if "cov_row" in pdict:
+            from scipy.sparse import coo_matrix
+            _row = np.array(pdict['cov_row'])
+            _col = np.array(pdict['cov_col'])
+            _data = np.array(pdict['cov_data'])
+            data = np.hstack([_data, _data])
+            row = np.hstack([_row, _col])
+            col = np.hstack([_col, _row])
+            self._cov = coo_matrix((data, (row, col)))
+            self._cov.setdiag(self._cov.diagonal()*0.5)
+            self._cov = self._cov.toarray()
+            
 
     def fmin(self, nsamples=1, nrestart=1, use_grad=False):
         return apprentice.tools.extreme(self, nsamples, nrestart, use_grad, mode="min")
@@ -286,11 +329,35 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
             if self.vmin > v or self.vmax < v:dec=False
         return dec
 
+def testPA():
+    def mkTestData(NX, dim=1):
+        def anthonyFunc(x):
+            return 2*x**2 + 1
+            # return x**3-x**2
+        np.random.seed(555)
+        X = 10*np.random.rand(NX, dim) -1
+        Y = np.array([anthonyFunc(*x) for x in X])
+        return X, Y
+
+    X, Y = mkTestData(5)
+    data = Y + Y * np.random.normal(loc=0, scale=0.01, size=5)
+    p2 = PolynomialApproximation(X=X, Y=data, order=2, strategy=1, computecov=True)
+    p2.save("polytest2.json")
+    p3 = PolynomialApproximation(fname="polytest2.json", computecov=True)
+    fitted = [p3.predictWithError(xi) for xi in X]
+    yhat = np.array([item[0] for item in fitted])
+    yerr = np.array([item[1] for item in fitted])
+    print("X:   ", X.reshape(-1))
+    print("Y:   ", data)
+    print("Yhat:", yhat)
+    print("Yerr:", yerr)
 
 
 if __name__=="__main__":
 
     import sys
+    testPA()
+    exit(0)
 
     def mkTestData(NX, dim=1):
         def anthonyFunc(x):
@@ -330,6 +397,7 @@ if __name__=="__main__":
     # X=np.linspace(-1,1,11)
     Y=f(X)
     pp = PolynomialApproximation(X=[[x] for x in X], Y=Y, order=2, strategy=1)
+
     pylab.clf()
     pylab.plot(X, Y, marker="*", linestyle="none", label="Data")
 
