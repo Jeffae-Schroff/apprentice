@@ -53,7 +53,7 @@ for i in range(len(params)):
     print(params[i].ljust(20), str(mean).ljust(20), str(stdev).ljust(20), boundary_proportion)
 
 # zoom into the graph by this factor
-zoom = 20
+zoom = 1
 for i in range(len(params)):
     plt.figure()
     title = filename
@@ -62,9 +62,9 @@ for i in range(len(params)):
     if filter and boundary[i] != 0:
         title += " (" + str(boundary[i]) + " boundary values excluded)"
 
-    mid = (const.p_max[i] + const.p_min[i]) / 2.0
+    target = const.targets[i]
     span = (const.p_max[i] - const.p_min[i]) / zoom
-    plot_range = [mid - span/2, mid + span/2]
+    plot_range = [target - span/2, target + span/2]
 
     plt.hist(filtered_vals[i], bins=30, range = plot_range)
     plt.title(title)

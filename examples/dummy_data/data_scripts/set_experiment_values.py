@@ -13,7 +13,7 @@ x_max = [4,5]
 y_min = [0,0]
 y_max = [1.5,1.5]
 
-#exponential functions used
+#Gaussian functions used
 def func1(x, params):
     a, b = params[0], params[1]
     return np.exp(-((x-a)**2/(2*b)**2))

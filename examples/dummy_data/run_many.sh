@@ -5,7 +5,7 @@ python3 data_scripts/add_err.py
 app-datadirtojson Data -o data.json
 
 experiment_name="cov_2_gauss_func"
-num_runs=1000
+num_runs=200
 
 start=$(date +%s)
 python3 data_scripts/new_many_tunes.py
