@@ -12,4 +12,4 @@ task_number = sys.argv[2]
 
 f = open(filename, "w")
 for i in range(int(task_number)):
-    f.write("bash " + os.getcwd() + "/cori_bash/run_one.sh " + str(i) + "\n")
+    f.write(os.getcwd() + "/cori_bash/run_one.sh " + str(i) + "\n")
