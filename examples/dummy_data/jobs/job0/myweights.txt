@@ -1,0 +1,2 @@
+/func0	1.0 # 20 bins
+/func1	1.0 # 20 bins

@@ -1,0 +1,10 @@
+# Objective value at best fit point: 14.52 (14.52 without weights)
+# Degrees of freedom: 26
+# chi2/ndf: 0.558
+# Minimisation took 18.35 seconds
+# Command line: /global/homes/j/jeffae/.conda/envs/mctuning/bin/app-tune2 myweights.txt /global/cscratch1/sd/jeffae/apprentice/examples/dummy_data/data.json val_30.json --computecov True -o tune_w_cov
+# Best fit point:#
+# PNAME	 PVALUE             #    COMMENT    [  PLOW                ...   PHIGH             ]
+#
+a     	0.99882259822072    #               [ 0.09290082543999545  ...  1.9398197043239886 ]
+b     	0.49842819401085425 #               [ 0.13094966900369656  ...  0.9881982429404655 ]
