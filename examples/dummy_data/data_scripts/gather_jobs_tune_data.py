@@ -11,8 +11,8 @@ filename = sys.argv[1]
 job_folder = sys.argv[2]
 num_jobs = sys.argv[3]
 
-for folder_number in range(num_jobs):
-    tune_output = open(job_folder + "/job" + folder_number + "/" + filename + '/minimum_tnc_1_1.txt', 'r').readlines()
+for folder_number in range(int(num_jobs)):
+    tune_output = open(job_folder + "/job" + str(folder_number) + "/" + filename + '/minimum_tnc_1_1.txt', 'r').readlines()
 
     params = []
     vars = []
