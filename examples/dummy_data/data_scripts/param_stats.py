@@ -3,12 +3,12 @@ import os
 import numpy as np
 import statistics
 import matplotlib.pyplot as plt
-import set_experiment_values as const
+import examples.dummy_data.data_scripts.set_experiment_values_gauss as const
 #prints stats of given file in many_tunes
 #assumes first row is names of parameters, rest are values in columns
 #Also generates histograms
-#Urgh, range has to be hardcoded, maybe fix later
-#filter out boundary values
+
+#filter out boundary values or not
 filter = True
 
 if len(sys.argv) != 2 :
@@ -24,19 +24,19 @@ file_lines = open(filepath, 'r').readlines()
 file_output = np.array([f.split() for f in file_lines])
 
 params = file_output[0]
-
-vals = []
+vals = file_output[1:,:]
 filtered_vals = []
-boundary= []
+boundary = []
+
 for i in range(len(params)):
-    vals.append(file_output[1:,i].astype(np.float))
     boundary_num = 0
     filtered_val = []
-    for j in range(len(vals[i])):
-        if filter and (vals[i][j] == const.p_min[i] or vals[i][j] == const.p_max[i]):
+    for j in range(len(vals[:,i])):
+        val = float(vals[j][i])
+        if filter and (val == const.p_min[i] or val == const.p_max[i]):
             boundary_num += 1
         else:
-            filtered_val.append(vals[i][j])
+            filtered_val.append(val)
     filtered_vals.append(filtered_val)
     boundary.append(boundary_num)
 
@@ -66,7 +66,7 @@ for i in range(len(params)):
     span = (const.p_max[i] - const.p_min[i]) / zoom
     plot_range = [target - span/2, target + span/2]
 
-    plt.hist(filtered_vals[i], bins=30, range = plot_range)
+    plt.hist(filtered_vals[i], bins=100, range = plot_range)
     plt.title(title)
     plt.xlabel(params[i] + " value")
     plt.ylabel("Frequency")

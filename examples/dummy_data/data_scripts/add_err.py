@@ -3,7 +3,6 @@ import h5py
 import numpy as np
 import set_experiment_values as const
 # %%
-#make this a parameter? perhaps not important
 f = h5py.File("inputdata.h5", "r+")
 # %%
 num_runs = np.shape(f['params'])[0]

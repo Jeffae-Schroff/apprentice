@@ -26,13 +26,13 @@ while place < len(tune_output):
 if(not os.path.exists("many_tunes/"+filename)):
     f = open("many_tunes/"+filename, "w")
     for p in params:
-        f.write(p.ljust(20))
+        f.write(p.ljust(25))
     f.write('\n')
     f.close()
 
 #write the var values, appending this time
 f = open("many_tunes/"+filename, "a")
 for v in vars:
-    f.write(str(v).ljust(20))
+    f.write(str(v).ljust(25))
 f.write('\n')
 f.close()

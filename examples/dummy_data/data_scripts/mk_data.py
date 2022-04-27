@@ -3,7 +3,7 @@ import numpy as np
 import yoda
 import os
 import shutil
-import set_experiment_values as vals
+import examples.dummy_data.data_scripts.set_experiment_values_gauss as vals
 """
 Exponential Distribution
 """
