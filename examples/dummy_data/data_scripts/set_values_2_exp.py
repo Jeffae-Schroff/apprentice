@@ -36,6 +36,9 @@ def observation_error(x, params, error_type):
     #error goes from 9 to 16 %
     elif error_type == "linear":
         return x*5*(a - b)/100
+    #error goes from 0 to ~30%
+    elif error_type == "log":
+        return -0.2*a*b*np.log(x)
     else:
         print("error in observation error in set_value")
 
