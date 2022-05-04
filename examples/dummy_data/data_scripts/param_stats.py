@@ -3,7 +3,7 @@ import os
 import numpy as np
 import statistics
 import matplotlib.pyplot as plt
-import examples.dummy_data.data_scripts.set_experiment_values_gauss as const
+import set_experiment_values as const
 #prints stats of given file in many_tunes
 #assumes first row is names of parameters, rest are values in columns
 #Also generates histograms

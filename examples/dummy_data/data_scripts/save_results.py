@@ -13,6 +13,5 @@ print("saving all tuning data to " + save_folder)
 if(os.path.isdir(save_folder)):
     shutil.rmtree(save_folder) 
 shutil.copytree("many_tunes", save_folder)
-shutil.copy("data_scripts/set_experiment_values.py", save_folder+"/set_experiment_values.py")
 shutil.copy("run_many.sh", save_folder+"/run_many.sh")
 
