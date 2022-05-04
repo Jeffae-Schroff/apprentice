@@ -3,25 +3,37 @@ import os
 import numpy as np
 import statistics
 import matplotlib.pyplot as plt
-import set_experiment_values as const
 #prints stats of given file in many_tunes
 #assumes first row is names of parameters, rest are values in columns
 #Also generates histograms
+import argparse
+# %%
+parser = argparse.ArgumentParser()
+
+# mandatory arguments
+parser.add_argument("filepath", help="folder with stats", type=str)
+parser.add_argument("experimentName", help="2_exp and 2_gauss valid, also name of folder in results to save to", type=str)
+# parser.add_argument("errorType", help="linear, low_linear", type=str)
+
+# Parse arguments
+args = parser.parse_args()
 
 #filter out boundary values or not
 filter = True
 
-if len(sys.argv) != 2 :
-    print('invalid arguments to gather_data.py')
-
-filepath = sys.argv[1]
-if(not os.path.exists(filepath)):
+if(not os.path.exists(args.filepath)):
     print('file given to param_stats.py does not exist')
-
-filename = filepath.split('/')[-1]
-file_lines = open(filepath, 'r').readlines()
+filename = args.filepath.split('/')[-1]
+file_lines = open(args.filepath, 'r').readlines()
 # Using np array, not list to pull columns easier
 file_output = np.array([f.split() for f in file_lines])
+
+if args.experimentName == "2_exp":
+    import set_values_2_exp as const
+elif args.experimentName == "2_gauss":
+    import set_values_2_gauss as const
+else:
+    print("error with experiment name in mk_data")
 
 params = file_output[0]
 vals = file_output[1:,:]
