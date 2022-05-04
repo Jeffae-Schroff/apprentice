@@ -363,8 +363,8 @@ def readPnamesH5(fname, xfield):
     import h5py
 
     with h5py.File(fname, "r") as f:
-        pnames = [p for p in f.get(xfield).attrs["names"]]
-        print("hi ", pnames)
+        pnames = [p.astype(str) for p in f.get(xfield).attrs["names"]]
+        print("parameter names: ", pnames)
 
     return pnames
 
