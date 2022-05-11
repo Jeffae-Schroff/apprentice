@@ -11,10 +11,14 @@ parser.add_argument("errorType", help="linear, low_linear", type=str)
 
 # Parse arguments
 args = parser.parse_args()
-if args.experimentName == "2_exp":
+if args.experimentName == '2_exp':
     import set_values_2_exp as vals
-elif args.experimentName == "2_gauss":
+elif args.experimentName == '2_gauss':
     import set_values_2_gauss as vals
+elif args.experimentName == '2_exp_new_events':
+    import set_values_2_exp_new_events as vals
+elif args.experimentName == '2_gauss_new_range':
+    import set_values_2_gauss_new_range as vals
 else:
     print("error with experiment name in mk_data")
 
