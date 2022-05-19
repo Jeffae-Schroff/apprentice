@@ -1,0 +1,5 @@
+
+Stats for tune_w_cov
+Parameter          Mean                Standard Deviation  Proportion boundary 
+a                   1.4650800408003164  0.29674046668004284 0.0                 
+b                   -1.0106319311809713 0.12844203726778386 0.0                 

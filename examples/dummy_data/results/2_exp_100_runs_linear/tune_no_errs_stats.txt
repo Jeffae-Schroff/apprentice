@@ -1,0 +1,5 @@
+
+Stats for tune_no_errs
+Parameter          Mean                Standard Deviation  Proportion boundary 
+a                   1.4984277872232223  0.0077963447304283570.0                 
+b                   -1.0020588240091157 0.0040616577220534760.0                 

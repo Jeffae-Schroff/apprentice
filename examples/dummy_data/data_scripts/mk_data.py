@@ -1,4 +1,5 @@
 # %makes MC and target data, saves observable histograms to many_tunes%
+import math
 import numpy as np
 import yoda
 import os
@@ -57,14 +58,16 @@ def main():
     for i in range(len(vals.funcs)):
         run_params[i,:] = vals.p_min[i] + (vals.p_max[i] - vals.p_min[i])*np.random.rand(run_vals.num_folders)
     
-    plot_envelope(run_params)
+    
     make_target_scatter(vals.funcs)
 
     np.random.seed(42) #does this mean param value samples are deterministic?
 
+    every_histo_point = []
     for j in range(run_vals.num_folders):
-        print("mk_data" + str(j) + "/" + str(run_vals.num_folders))
-        make_histos(run_params[:,j], j)
+        print("mk_data" + str(j+1) + "/" + str(run_vals.num_folders))
+        every_histo_point.append(make_histos(run_params[:,j], j))
+    #plot_envelope(run_params, every_histo_point)
 
     
     
@@ -79,6 +82,7 @@ def make_histos(params, run_num):
     file.close()
 
     h = []
+    all_histo_points = []
     event_weight = vals.num_events(params)/NPOINTS
     #i determines which observable func we are processing
     for i in range(len(vals.funcs)):
@@ -86,14 +90,26 @@ def make_histos(params, run_num):
         def sample_func(x):
             return vals.funcs[i](x, params)
         histo_points = function_sample(sample_func, vals.x_min[i],vals.x_max[i],vals.y_min[i], vals.y_max[i],NPOINTS)
+        all_histo_points.append(histo_points)
+
+        #since this multiplies the fill, std is the percent obs error
+        errors = np.random.normal(1, vals.observation_error(1, params, args.errorType), run_vals.nbins)
+        print('errors: ', errors)
+        new_weights = []
         for xval in histo_points:
-            h[i].fill(xval, event_weight)
+            new_weights.append(event_weight*fill_error(errors, xval, vals.x_min[i], vals.x_max[i]))
+            h[i].fill(xval, new_weights[-1])
 
         #plot observable histogram to observable folder in many_tunes where it will be saved to results by another script
-        plt.hist(histo_points, bins=run_vals.nbins, range=[vals.x_min[i], vals.x_max[i]], weights = [event_weight]*len(histo_points))
+        plt.hist(histo_points, bins=run_vals.nbins, range=[vals.x_min[i], vals.x_max[i]], histtype='step',
+          weights=[event_weight]*len(histo_points), alpha = 0.5, label='nominal')
+        #plot observable histogram to observable folder in many_tunes where it will be saved to results by another script
+        plt.hist(histo_points, bins=run_vals.nbins, range=[vals.x_min[i], vals.x_max[i]], histtype='step',
+            weights=new_weights, alpha = 0.5, label='reweighted')
         plt.title(args.experimentName + ' observable function: ' + vals.func_strs[i])
         plt.xlabel("x")
         plt.ylabel("Number of Events")
+        plt.legend()
         for j in range(len(vals.pnames)):
             plt.annotate(vals.pnames[j] + '=' + str(round(params[j],3)), xy=(0.85, 1-0.05*(1+j)), xycoords='axes fraction')
         figStr = '_'.join([vals.pnames[j] + '=' + str(round(params[j],2)) for j in range(len(vals.pnames))])
@@ -101,6 +117,17 @@ def make_histos(params, run_num):
         plt.close()
             
     yoda.write(h, 'MC/' + folder + '/combined.yoda')
+    return all_histo_points
+
+#Takes array and number of bins, returns the value in array corresponding to bin's point on range
+def fill_error(errors, value, xmin, xmax):
+    if value < xmin or value > xmax:
+        print("error in fill_error")
+    #between 0 and 1
+    normal_value = (value-xmin)/(xmax-xmin)
+    return errors[math.floor(normal_value*len(errors))]
+
+
 
 #Return points from a uniformly distribution beneath the given function bounded by ([xmin, xmax], [ymin, ymax]).
 def function_sample(func, xmin, xmax, ymin, ymax, num_points):
@@ -146,20 +173,35 @@ def make_target_scatter(funcs):
         s.append(h.mkScatter())
     yoda.write(s, 'Data/' + '/ATLAS_2021_dummy.yoda')
 
-def plot_envelope(run_params):
+def plot_envelope(run_params, histo_points):
+    # for every observable
     for i in range(len(vals.funcs)):
-        num_x = 100
-        x = [j/num_x for j in range(num_x*vals.x_min[i], num_x*vals.x_max[i])]
+        # num_x = 100
+        # x = [j/num_x for j in range(num_x*vals.x_min[i], num_x*vals.x_max[i])]
+        # for every MC run of the observable
+        event_weight = vals.num_events(run_params)/NPOINTS
+        plt.figure()
         for j in range(run_vals.num_folders):
-            def obs_with_param(x):
-                return vals.funcs[i](x, run_params[:,j])
+            # def obs_with_param(x):
+            #     return vals.funcs[i](x, run_params[:,j])
             
-            y = [obs_with_param(k) for k in x]
+            # y = [obs_with_param(k) for k in x]
             #color based on first two params
             norm_param_1 = (run_params[0,j]-vals.p_min[0])/(vals.p_max[0]-vals.p_min[0])
             norm_param_2 = (run_params[1,j]-vals.p_min[1])/(vals.p_max[1]-vals.p_min[1])
             param_color = (0.25 + 0.75*norm_param_1, 0.25, 1 - 0.75*norm_param_1, 1 - 0.75*norm_param_2)
-            plt.plot(x, y, linestyle="-", color = param_color)
+            # plt.plot(x, y, linestyle="-", color = param_color)
+            print(len(histo_points))
+            print(len(histo_points[j]))
+            print(len(histo_points[j][i]))
+            print(histo_points[j][i][0])
+            print(len([event_weight]*len(histo_points[j][i])))
+            for k in histo_points[j][i]:
+                if k is None:
+                    print("yo")
+            plt.hist(histo_points[j][i], bins=run_vals.nbins, range=[vals.x_min[i], vals.x_max[i]], 
+                weights = [event_weight]*len(histo_points[j][i]), color = param_color)
+        
         
         plt.xlim(vals.x_min[i], vals.x_max[i])
         plt.ylim(vals.y_min[i], vals.y_max[i]) 

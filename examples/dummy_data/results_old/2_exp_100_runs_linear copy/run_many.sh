@@ -27,9 +27,7 @@ do
     current=$(date +%s)
     printf "\n\n------------Run $i of $num_runs finished     Elapsed time: $(($current-$start)) s--------------\n\n"
 done
+python3 data_scripts/param_stats.py many_tunes/tune_no_errs 2_exp
+python3 data_scripts/param_stats.py many_tunes/tune_w_errs 2_exp
+python3 data_scripts/param_stats.py many_tunes/tune_w_cov 2_exp
 python3 data_scripts/save_results.py "${experiment_name}_${num_runs}_runs_${error}"
-pushd results/"${experiment_name}_${num_runs}_runs_${error}"
-python3 ../../data_scripts/param_stats.py tune_no_errs "${experiment_name}" 1
-python3 ../../data_scripts/param_stats.py tune_w_errs "${experiment_name}" 1
-python3 ../../data_scripts/param_stats.py tune_w_cov "${experiment_name}" 1
-popd
