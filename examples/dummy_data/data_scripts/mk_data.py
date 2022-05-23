@@ -17,7 +17,7 @@ import set_run_vals as run_vals
 parser = argparse.ArgumentParser()
 
 # mandatory arguments
-parser.add_argument("experimentName", help="2_exp and 2_gauss valid, also name of folder in results to save to", type=str)
+parser.add_argument("experimentName", help="Ex: 2_exp or 2_gauss, determines which set_values to use and name of save folder", type=str)
 parser.add_argument("errorType", help="linear, low_linear", type=str)
 parser.add_argument("npoints", help="number of points used in observable graphs", type=float)
 
@@ -94,27 +94,27 @@ def make_histos(params, run_num):
 
         #since this multiplies the fill, std is the percent obs error
         errors = np.random.normal(1, vals.observation_error(1, params, args.errorType), run_vals.nbins)
-        print('errors: ', errors)
+        # print('errors: ', errors)
         new_weights = []
         for xval in histo_points:
             new_weights.append(event_weight*fill_error(errors, xval, vals.x_min[i], vals.x_max[i]))
             h[i].fill(xval, new_weights[-1])
 
-        #plot observable histogram to observable folder in many_tunes where it will be saved to results by another script
-        plt.hist(histo_points, bins=run_vals.nbins, range=[vals.x_min[i], vals.x_max[i]], histtype='step',
-          weights=[event_weight]*len(histo_points), alpha = 0.5, label='nominal')
-        #plot observable histogram to observable folder in many_tunes where it will be saved to results by another script
-        plt.hist(histo_points, bins=run_vals.nbins, range=[vals.x_min[i], vals.x_max[i]], histtype='step',
-            weights=new_weights, alpha = 0.5, label='reweighted')
-        plt.title(args.experimentName + ' observable function: ' + vals.func_strs[i])
-        plt.xlabel("x")
-        plt.ylabel("Number of Events")
-        plt.legend()
-        for j in range(len(vals.pnames)):
-            plt.annotate(vals.pnames[j] + '=' + str(round(params[j],3)), xy=(0.85, 1-0.05*(1+j)), xycoords='axes fraction')
-        figStr = '_'.join([vals.pnames[j] + '=' + str(round(params[j],2)) for j in range(len(vals.pnames))])
-        plt.savefig(observable_folder + '/MC/obs' + str(i) + '--' + figStr + ".pdf")
-        plt.close()
+        # #plot observable histogram to observable folder in many_tunes where it will be saved to results by another script
+        # plt.hist(histo_points, bins=run_vals.nbins, range=[vals.x_min[i], vals.x_max[i]], histtype='step',
+        #   weights=[event_weight]*len(histo_points), alpha = 0.5, label='nominal')
+        # #plot observable histogram to observable folder in many_tunes where it will be saved to results by another script
+        # plt.hist(histo_points, bins=run_vals.nbins, range=[vals.x_min[i], vals.x_max[i]], histtype='step',
+        #     weights=new_weights, alpha = 0.5, label='reweighted')
+        # plt.title(args.experimentName + ' observable function: ' + vals.func_strs[i])
+        # plt.xlabel("x")
+        # plt.ylabel("Number of Events")
+        # plt.legend()
+        # for j in range(len(vals.pnames)):
+        #     plt.annotate(vals.pnames[j] + '=' + str(round(params[j],3)), xy=(0.85, 1-0.05*(1+j)), xycoords='axes fraction')
+        # figStr = '_'.join([vals.pnames[j] + '=' + str(round(params[j],2)) for j in range(len(vals.pnames))])
+        # plt.savefig(observable_folder + '/MC/obs' + str(i) + '--' + figStr + ".pdf")
+        # plt.close()
             
     yoda.write(h, 'MC/' + folder + '/combined.yoda')
     return all_histo_points

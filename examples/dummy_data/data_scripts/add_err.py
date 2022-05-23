@@ -1,8 +1,9 @@
-# %%
+# adds error to the inputdata.h5 file using the observation_error function
+# (which is stored in the set_values file corresponding with the experimentName it is given)
+
 import h5py
 import numpy as np
 import argparse
-# %%
 parser = argparse.ArgumentParser()
 
 # mandatory arguments
@@ -24,9 +25,9 @@ else:
 
 
 f = h5py.File("inputdata.h5", "r+")
-# %%
+
 num_runs = np.shape(f['params'])[0]
-#this is number of bins in a histogram*number of observables
+#num_bins is number of bins in a histogram * number of observables
 num_bins = np.shape(f['values'])[0]
 for i in range(num_runs):
     params = []
@@ -35,6 +36,4 @@ for i in range(num_runs):
     #values of params are constant within each run
     for j in range(num_bins):
         f['errors'][j ,i] = vals.observation_error(f['values'][j,i], params, args.errorType)
-# %%
 f.close()
-# %%
