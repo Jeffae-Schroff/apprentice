@@ -9,7 +9,7 @@ import argparse
 import matplotlib.pyplot as plt
 import importlib
 from scipy.integrate import quad
- 
+
 parser = argparse.ArgumentParser()
 
 # mandatory arguments
@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 f = h5py.File(args.filepath, "r+")
 
-vals = importlib.import_module("set_values_" + args.experimentName)
+vals = importlib.import_module('set_values_' + args.experimentName)
 
 # print(f.keys())
 # for i in f.keys():
@@ -48,39 +48,88 @@ for index in f['index']:
         obs_bins += 1
 
 def main():
+    if(os.path.isdir('h5_graphs')):
+        shutil.rmtree('h5_graphs') 
+        os.mkdir('h5_graphs/')
     for obs_num in range(len(obs_names)):
+        os.mkdir('h5_graphs/'+obs_names[obs_num])
         for run_num in range(num_runs):
-            if(os.path.isdir('h5_graphs')):
-                shutil.rmtree('h5_graphs') 
-            os.mkdir('h5_graphs/')
-
+            plt.figure() 
             plot_reweighted(obs_num, run_num)
-            
+            plot_nominal(obs_num, run_num)
+            plt.title(args.experimentName + ' observable function: ' + vals.func_strs[obs_num])
             plt.xlabel("x")
             plt.ylabel("Number of Events")
             plt.legend()
-            plt.savefig("h5_graphs/"+obs_names[obs_num] + "_" + str(run_num) + ".pdf", format="pdf")
+            #Use vals.pnames for parameter names--this is not in h5 file. Otherwise, reweighted is based only on h5 information
+            param_str = '_'.join([vals.pnames[i] + '=' + str(round(f['params'][run_num,i],2)) for i in range(len(vals.pnames))])
+            plt.savefig("h5_graphs/"+obs_names[obs_num] + "/run_" + str(run_num) + "(" + param_str + ").pdf", format="pdf")
+            plt.close()
+    # histogram group pictures
+    for obs_num in range(len(obs_names)):
+        plt.figure() 
+        for run_num in range(num_runs):
+            norm_param_1 = (f['params'][run_num,0]-vals.p_min[0])/(vals.p_max[0]-vals.p_min[0])
+            norm_param_2 = (f['params'][run_num,1]-vals.p_min[1])/(vals.p_max[1]-vals.p_min[1])
+            param_color = [0.25 + 0.75*norm_param_1, 0.25, 1 - 0.75*norm_param_1, 1 - 0.75*norm_param_2]
+            plot_nominal(obs_num, run_num, param_color)
+        plt.title(args.experimentName + ' observable function: ' + vals.func_strs[obs_num])
+        plt.xlabel("x")
+        plt.ylabel("Number of Events")
+        plt.annotate(vals.pnames[0] + ': red to blue', xy=(0.68, 0.95), xycoords='axes fraction')
+        plt.annotate(vals.pnames[1] +': opacity (low to high)', xy=(0.68, 0.9), xycoords='axes fraction')
+        plt.legend([])
+        plt.savefig("h5_graphs/"+obs_names[obs_num] + "_all_nominal.pdf", format="pdf")
+        plt.close()
+    for obs_num in range(len(obs_names)):
+        plt.figure() 
+        for run_num in range(num_runs):
+            norm_param_1 = (f['params'][run_num,0]-vals.p_min[0])/(vals.p_max[0]-vals.p_min[0])
+            norm_param_2 = (f['params'][run_num,1]-vals.p_min[1])/(vals.p_max[1]-vals.p_min[1])
+            param_color = [0.25 + 0.75*norm_param_1, 0.25, 1 - 0.75*norm_param_1, 1 - 0.75*norm_param_2]
+            plot_reweighted(obs_num, run_num, param_color)
 
+        plt.title(args.experimentName + ' observable function: ' + vals.func_strs[obs_num])
+        plt.xlabel("x")
+        plt.ylabel("Number of Events")
+        plt.annotate(vals.pnames[0] + ': red to blue', xy=(0.68, 0.95), xycoords='axes fraction')
+        plt.annotate(vals.pnames[1] +': opacity (low to high)', xy=(0.68, 0.9), xycoords='axes fraction')
+        plt.legend([])
+        plt.savefig("h5_graphs/"+obs_names[obs_num] + "_all_reweighted.pdf", format="pdf")
+        plt.close()  
     f.close()
 
 #-----------------------------------------------plots actual data stored in h5 file-----------------------------------------
 #obs_num, run_num start at 0
-def plot_reweighted(obs_num, run_num):
+def plot_reweighted(obs_num, run_num, color=[0, 0.4470, 0.7410, 0.5]):
+    #the range of indexes that match our obs_num, [o_min, o_max)
+    o_min = obs_num*obs_bins
+    o_max = (obs_num + 1)*obs_bins
+    #x values in middle of bins
+    fake_points = (f['xmax'][o_min:o_max] + f['xmin'][o_min:o_max])/2 
+    #insert points with x in middle of bins, weighted to value of bin in h5 file
+    plt.hist(fake_points, bins=obs_bins, range=[f['xmin'][o_min], f['xmax'][o_max-1]], histtype='step',
+            weights=f['values'][o_min:o_max, run_num], label='reweighted', color = color)
+
+#-------------------plots nominal data using param values from file plugged into obs func from experiment name=-------------
+def plot_nominal (obs_num, run_num, color = [0.8500, 0.3250, 0.0980, 0.5]):
+    #Uses the param values and bin boundaries in the h5 file, the rest is from the exp file.
+    params = f['params'][run_num]
     #the range of indexes that match our obs_num, [o_min, o_max)
     o_min = obs_num*obs_bins
     o_max = (obs_num + 1)*obs_bins
 
+    def integratee(x):
+        return vals.funcs[obs_num](x, params)
+    nominal_bin_values = [quad(integratee, f['xmin'][i], f['xmax'][i])[0] for i in range(o_min, o_max)]
+    
+    scaled_sum = vals.num_events(params) / (f['xmax'][o_min] - f['xmin'][o_min])
+    nominal_bin_values = nominal_bin_values / (sum(nominal_bin_values) / scaled_sum)
+    #x values in middle of bins
     fake_points = (f['xmax'][o_min:o_max] + f['xmin'][o_min:o_max])/2 
     #insert points with x in middle of bins, weighted to value of bin in h5 file
     plt.hist(fake_points, bins=obs_bins, range=[f['xmin'][o_min], f['xmax'][o_max-1]], histtype='step',
-            weights=f['values'][o_min:o_max, run_num], alpha = 0.5, label='reweighted')
-
-#-------------------plots nominal data using param values from file plugged into obs func from experiment name=-------------
-
-# fake_points = (f['xmax'][:] + f['xmin'][:])/2 
-# #insert points with x in middle of bins, weighted average value of value of function in bin range
-# plt.hist(fake_points, bins=obs_bins, range=[f['xmin'][0], f['xmax'][-1]], histtype='step',
-#           weights=f['values'][:,0], alpha = 0.5, label='reweighted')
+            weights=nominal_bin_values, label='nominal', color = color)
 
 
 
