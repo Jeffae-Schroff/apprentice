@@ -34,10 +34,13 @@ total_bins = np.shape(f['values'])[0]
 num_runs = np.shape(f['values'])[1]
 # index is array of dim [#obs*obs_bins]:
 # assumes no '#' char in obs name
+# the names start with '/' which is problematic (or not??)
 current_obs = (f['index'][0].decode("utf-8")).split('#')[0]
+# current_obs = current_obs[1:]
 obs_names = [current_obs]
 for index in f['index']:
     current_str = index.decode("utf-8").split('#')[0]
+    # current_str = current_str[1:]
     if current_str != current_obs:
         current_obs = current_str
         obs_names.append(current_obs)
@@ -50,7 +53,7 @@ for index in f['index']:
 def main():
     if(os.path.isdir('h5_graphs')):
         shutil.rmtree('h5_graphs') 
-        os.mkdir('h5_graphs/')
+    os.mkdir('h5_graphs/')
     for obs_num in range(len(obs_names)):
         os.mkdir('h5_graphs/'+obs_names[obs_num])
         for run_num in range(num_runs):

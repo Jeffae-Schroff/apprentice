@@ -1,59 +1,0 @@
-hi  ['a', 'b']
-[0] will proceed to calculate approximations for 40 objects
-Using 30 of 42 runs from MC data[0] 5/40 (elapsed: 1.3s, to go: 9.6s, ETA: 2022-04-05 08:53:59)[0] 10/40 (elapsed: 1.3s, to go: 4.1s, ETA: 2022-04-05 08:53:54)[0] 15/40 (elapsed: 1.3s, to go: 2.3s, ETA: 2022-04-05 08:53:52)[0] 20/40 (elapsed: 1.3s, to go: 1.4s, ETA: 2022-04-05 08:53:51)[0] 25/40 (elapsed: 1.3s, to go: 0.9s, ETA: 2022-04-05 08:53:51)[0] 30/40 (elapsed: 1.3s, to go: 0.5s, ETA: 2022-04-05 08:53:50)[0] 35/40 (elapsed: 1.4s, to go: 0.2s, ETA: 2022-04-05 08:53:50)[0] 40/40 (elapsed: 1.4s, to go: 0.0s, ETA: 2022-04-05 08:53:50)
-Approximation calculation took 1.3563930988311768 seconds
-Done --- 42 approximations written to val_30.json
-hi  ['a', 'b']
-[0] will proceed to calculate approximations for 40 objects
-Using 30 of 42 runs from MC data[0] 5/40 (elapsed: 0.5s, to go: 3.4s, ETA: 2022-04-05 08:54:18)[0] 10/40 (elapsed: 0.5s, to go: 1.5s, ETA: 2022-04-05 08:54:16)[0] 15/40 (elapsed: 0.5s, to go: 0.8s, ETA: 2022-04-05 08:54:15)[0] 20/40 (elapsed: 0.5s, to go: 0.5s, ETA: 2022-04-05 08:54:15)[0] 25/40 (elapsed: 0.5s, to go: 0.3s, ETA: 2022-04-05 08:54:15)[0] 30/40 (elapsed: 0.5s, to go: 0.2s, ETA: 2022-04-05 08:54:15)[0] 35/40 (elapsed: 0.5s, to go: 0.1s, ETA: 2022-04-05 08:54:15)[0] 40/40 (elapsed: 0.5s, to go: 0.0s, ETA: 2022-04-05 08:54:15)
-Approximation calculation took 0.4844496250152588 seconds
-Done --- 42 approximations written to err_20.json
-Fitted Result:  [0.99353069 0.49140953]
-[[  46069.19118363   -6717.84076856]
- [  -6717.84076856 1182259.23183993]]
-# Objective value at best fit point: 83.15 (83.15 without weights)
-# Degrees of freedom: 26
-# chi2/ndf: 3.198
-# Minimisation took 3.77 seconds
-# Command line: /global/homes/j/jeffae/.conda/envs/mctuning/bin/app-tune2 myweights.txt /global/cscratch1/sd/jeffae/apprentice/examples/dummy_data/data.json val_30.json -o tune_no_errs
-# Best fit point:
-#
-# PNAME	 PVALUE            #    COMMENT    [  PLOW                 ...   PHIGH             ]
-#
-a     	0.9935306885566546 #               [ 0.041168988591604894  ...  1.9312640661491187 ]
-b     	0.4914095264193371 #               [ 0.13094966900369656   ...  0.9881982429404655 ]
-
-Output written to directory tune_no_errs.
-Fitted Result:  [0.95905175 0.49008229]
-[[  343.87705444 -1411.50800626]
- [-1411.50800626  8689.34833416]]
-# Objective value at best fit point: 0.69 (0.69 without weights)
-# Degrees of freedom: 26
-# chi2/ndf: 0.027
-# Minimisation took 3.51 seconds
-# Command line: /global/homes/j/jeffae/.conda/envs/mctuning/bin/app-tune2 myweights.txt /global/cscratch1/sd/jeffae/apprentice/examples/dummy_data/data.json val_30.json -e err_20.json -o tune_w_errs
-# Best fit point:
-#
-# PNAME	 PVALUE             #    COMMENT    [  PLOW                 ...   PHIGH             ]
-#
-a     	0.9590517516548157  #               [ 0.041168988591604894  ...  1.9312640661491187 ]
-b     	0.49008229037220663 #               [ 0.13094966900369656   ...  0.9881982429404655 ]
-
-Output written to directory tune_w_errs.
-Using covariance matrix associated with coefficients
-Fitted Result:  [0.99401471 0.49583957]
-[[ 29978.453125   -19208.50195312]
- [-19208.50390625 523037.375     ]]
-# Objective value at best fit point: 20.22 (20.22 without weights)
-# Degrees of freedom: 26
-# chi2/ndf: 0.778
-# Minimisation took 8.24 seconds
-# Command line: /global/homes/j/jeffae/.conda/envs/mctuning/bin/app-tune2 myweights.txt /global/cscratch1/sd/jeffae/apprentice/examples/dummy_data/data.json val_30.json --computecov True -o tune_w_cov
-# Best fit point:
-#
-# PNAME	 PVALUE             #    COMMENT    [  PLOW                 ...   PHIGH             ]
-#
-a     	0.9940147083294395  #               [ 0.041168988591604894  ...  1.9312640661491187 ]
-b     	0.49583957358742925 #               [ 0.13094966900369656   ...  0.9881982429404655 ]
-
-Output written to directory tune_w_cov.
