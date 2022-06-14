@@ -1,0 +1,3 @@
+Hello world! This is task 588
+/home/jeffae/apprentice-cov/jobs/job587
+cae857ea6dcd

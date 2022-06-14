@@ -1,0 +1,3 @@
+Hello world! This is task 78
+/home/jeffae/apprentice-cov/jobs/job77
+cae857ea6dcd

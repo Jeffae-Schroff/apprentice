@@ -1,6 +1,7 @@
 # adds error to the inputdata.h5 file using the observation_error function
 # (which is stored in the set_values file corresponding with the experimentName it is given)
 
+import importlib
 import h5py
 import numpy as np
 import argparse
@@ -9,22 +10,14 @@ parser = argparse.ArgumentParser()
 # mandatory arguments
 parser.add_argument("experimentName", help="2_exp and 2_gauss valid, also name of folder in results to save to", type=str)
 parser.add_argument("errorType", help="linear, low_linear", type=str)
+parser.add_argument("h5File", help="where Data and MC are written to", type=str)
 
 # Parse arguments
 args = parser.parse_args()
-if args.experimentName == '2_exp':
-    import set_values_2_exp as vals
-elif args.experimentName == '2_gauss':
-    import set_values_2_gauss as vals
-elif args.experimentName == '2_exp_new_events':
-    import set_values_2_exp_new_events as vals
-elif args.experimentName == '2_gauss_new_range':
-    import set_values_2_gauss_new_range as vals
-else:
-    print("error with experiment name in mk_data")
+print("Running " + args.experimentName + " with " + args.errorType)
+vals = importlib.import_module('set_values_' + args.experimentName)
 
-
-f = h5py.File("inputdata.h5", "r+")
+f = h5py.File(args.h5File, "r+")
 
 num_runs = np.shape(f['params'])[0]
 #num_bins is number of bins in a histogram * number of observables

@@ -1,0 +1,3 @@
+Hello world! This is task 507
+/home/jeffae/apprentice-cov/jobs/job506
+cae857ea6dcd

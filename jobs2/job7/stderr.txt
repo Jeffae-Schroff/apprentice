@@ -1,0 +1,57 @@
+Traceback (most recent call last):
+  File "/usr/bin/app-ls", line 19, in <module>
+    binids, RA = apprentice.io.readApprox(args[0])
+  File "/usr/lib/python3.8/site-packages/apprentice/io.py", line 442, in readApprox
+    with open(fname) as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'val_30.json'
+Traceback (most recent call last):
+  File "/usr/bin/app-tune2", line 124, in <module>
+    GOF = app.appset.TuningObjective3(WFILE, DATA, APP, f_errors=opts.ERRAPP, debug=opts.DEBUG, computecov=opts.computecov)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 835, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 263, in __init__
+    if type(args[0]) == str: self.mkFromFiles(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 342, in mkFromFiles
+    AS = AppSet(f_approx)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 90, in __init__
+    self.mkFromFile(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 98, in mkFromFile
+    binids, RA = apprentice.io.readApprox(f_approx, set_structures=False, usethese=binids)
+  File "/usr/lib/python3.8/site-packages/apprentice/io.py", line 442, in readApprox
+    with open(fname) as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'val_30.json'
+Traceback (most recent call last):
+  File "/usr/bin/app-tune2", line 124, in <module>
+    GOF = app.appset.TuningObjective3(WFILE, DATA, APP, f_errors=opts.ERRAPP, debug=opts.DEBUG, computecov=opts.computecov)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 835, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 263, in __init__
+    if type(args[0]) == str: self.mkFromFiles(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 342, in mkFromFiles
+    AS = AppSet(f_approx)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 90, in __init__
+    self.mkFromFile(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 98, in mkFromFile
+    binids, RA = apprentice.io.readApprox(f_approx, set_structures=False, usethese=binids)
+  File "/usr/lib/python3.8/site-packages/apprentice/io.py", line 442, in readApprox
+    with open(fname) as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'val_30.json'
+Traceback (most recent call last):
+  File "/usr/bin/app-tune2", line 124, in <module>
+    GOF = app.appset.TuningObjective3(WFILE, DATA, APP, f_errors=opts.ERRAPP, debug=opts.DEBUG, computecov=opts.computecov)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 835, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 263, in __init__
+    if type(args[0]) == str: self.mkFromFiles(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 342, in mkFromFiles
+    AS = AppSet(f_approx)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 90, in __init__
+    self.mkFromFile(*args, **kwargs)
+  File "/usr/lib/python3.8/site-packages/apprentice/appset.py", line 98, in mkFromFile
+    binids, RA = apprentice.io.readApprox(f_approx, set_structures=False, usethese=binids)
+  File "/usr/lib/python3.8/site-packages/apprentice/io.py", line 442, in readApprox
+    with open(fname) as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'val_30.json'
+python3: can't open file 'data_scripts/gather_tune_data.py': [Errno 2] No such file or directory
+python3: can't open file 'data_scripts/gather_tune_data.py': [Errno 2] No such file or directory
+python3: can't open file 'data_scripts/gather_tune_data.py': [Errno 2] No such file or directory

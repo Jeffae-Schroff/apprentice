@@ -1,0 +1,3 @@
+Hello world! This is task 478
+/home/jeffae/apprentice-cov/jobs/job477
+cae857ea6dcd

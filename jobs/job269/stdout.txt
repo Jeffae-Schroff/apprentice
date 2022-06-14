@@ -1,0 +1,3 @@
+Hello world! This is task 270
+/home/jeffae/apprentice-cov/jobs/job269
+cae857ea6dcd

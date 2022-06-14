@@ -1,0 +1,3 @@
+Hello world! This is task 378
+/home/jeffae/apprentice-cov/jobs/job377
+cae857ea6dcd

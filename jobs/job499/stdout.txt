@@ -1,0 +1,3 @@
+Hello world! This is task 500
+/home/jeffae/apprentice-cov/jobs/job499
+cae857ea6dcd

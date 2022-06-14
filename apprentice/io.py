@@ -402,7 +402,7 @@ def readApprentice(fname):
 
 def yodaDir2Dict(dname):
     """
-    Recursively find and read all files ending with '.yoad' from directory dname.
+    Recursively find and read all files ending with '.yoda' from directory dname.
     """
     import apprentice as app
     import pathlib

@@ -91,7 +91,7 @@ if __name__ == "__main__":
         rng = np.random.default_rng(opts.SEED)
         rng.shuffle(in_sample, axis = 0)
     # if(opts.SAMPLE < 0):
-    # counts as opts.SAMPLE = num_runs, no change in behavior
+    # counts as opts.SAMPLE = num_runs, would not change behavior
 
     for num, (X, Y, E) in  enumerate(DATA):
         thisBinId = binids[num]

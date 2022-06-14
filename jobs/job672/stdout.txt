@@ -1,0 +1,3 @@
+Hello world! This is task 673
+/home/jeffae/apprentice-cov/jobs/job672
+cae857ea6dcd
