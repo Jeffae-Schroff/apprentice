@@ -1,0 +1,10 @@
+# Objective value at best fit point: 408.43 (408.43 without weights)
+# Degrees of freedom: 34
+# chi2/ndf: 12.013
+# Minimisation took 2.30 seconds
+# Command line: /usr/bin/app-tune2 myweights.txt ../../data.json val_30.json -o tune_no_errs
+# Best fit point:#
+# PNAME	 PVALUE             #    COMMENT    [  PLOW                ...   PHIGH              ]
+#
+a     	 1.4816225857295984 #               [  1.013889942421907   ...   1.8890705097963825 ]
+b     	-1.009261788315844  #               [ -1.1947591090725305  ...  -0.8246515585174409 ]

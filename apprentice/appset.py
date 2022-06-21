@@ -189,6 +189,7 @@ class AppSet(object):
             nc = apprentice.tools.numCoeffsPoly(self.dim, 2)
             MM=self._maxrec[:nc] * self._PC[sel][:,:nc]
         vals = np.sum(MM, axis=1)
+        print("\n\n\n\n\nappset, hi" + str(len(vals)))
         if self._hasRationals:
             den = np.sum(self._maxrec * self._QC[sel], axis=1)
             vals/=den

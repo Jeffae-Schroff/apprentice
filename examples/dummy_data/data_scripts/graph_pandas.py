@@ -1,40 +1,66 @@
 import argparse
-import os
 import importlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
 
-# python3 ../../data_scripts/graph_pandas.py 2_gauss_v2 results/many_tunes/tune_w_cov.csv
+# python3 ../../data_scripts/graph_pandas.py results/many_tunes 2_exp
 parser = argparse.ArgumentParser()
+parser.add_argument("tunesFolder", help="file with data in .csv files from many tunes", type=str)
 parser.add_argument("experimentName", help="Ex: 2_exp or 2_gauss, determines which target params to give to surrogate", type=str)
-parser.add_argument("tunesFile", help="csv file with data from many tunes", type=str)
+# add optional output later
 args = parser.parse_args()
 vals = importlib.import_module('set_values_' + args.experimentName)
 
-df = pd.read_csv(args.tunesFile)
-if(not os.path.isdir('results/panda_tunes_graphs')):
-    os.mkdir('results/panda_tunes_graphs/')
+filenames = list(os.walk(args.tunesFolder, topdown=False))[0][2]
 
-onbound = df.loc[df['ONBOUND'] == True]
-offbound = df.loc[df['ONBOUND'] == False]
+for tunesFile in filenames:
+    df = pd.read_csv(args.tunesFolder+'/'+tunesFile)
 
-tunes_type = args.tunesFile.split('/')[-1].split('.')[0]
-save_location = "results/panda_tunes_graphs/"+ args.experimentName.split('/')[-1]+tunes_type
-plt.scatter(onbound[vals.pnames[0]], onbound[vals.pnames[1]], alpha = 0.5, label = 'ONBOUND')
-plt.scatter(offbound[vals.pnames[0]], offbound[vals.pnames[1]], alpha = 0.5, label = 'not ONBOUND')
-plt.title(args.experimentName + '_' + tunes_type+' many_tunes')
-plt.xlabel(vals.pnames[0])
-plt.ylabel(vals.pnames[1])
-plt.savefig(save_location +".pdf")
-plt.close() 
+    onbound = df.loc[df['ONBOUND'] == True]
+    offbound = df.loc[df['ONBOUND'] == False]
 
-bins = np.linspace(15,50,100)
-# plt.hist(onbound['chi2'], bins, alpha = 0.5, label = 'ONBOUND')
-# plt.hist(offbound['chi2'], bins, alpha = 0.5, label = 'not ONBOUND')
-plt.hist(offbound['chi2'], bins = 100, alpha = 0.5, label = 'not ONBOUND')
+    tunes_type = tunesFile.split('/')[-1].split('.')[0]
+    save_location = 'results/panda_graphs/' + args.experimentName.split('/')[-1] + tunes_type
+    plt.scatter(onbound[vals.pnames[0]], onbound[vals.pnames[1]], alpha = 0.5, label = 'ONBOUND')
+    plt.scatter(offbound[vals.pnames[0]], offbound[vals.pnames[1]], alpha = 0.5, label = 'not ONBOUND')
+    plt.title(args.experimentName + '_' + tunes_type +' many_tunes')
+    plt.xlim([vals.p_min[0], vals.p_max[0]])
+    plt.ylim([vals.p_min[1], vals.p_max[1]])
+    plt.xlabel(vals.pnames[0])
+    plt.ylabel(vals.pnames[1])
+    plt.legend()
+    plt.savefig(save_location +"_tunes.pdf")
+    plt.close() 
+
+    bins=np.histogram(np.hstack((onbound['chi2'], offbound['chi2'])), bins=50)[1]
+    plt.hist(onbound['chi2'], bins = bins, alpha = 0.5, label = 'ONBOUND')
+    plt.hist(offbound['chi2'], bins = bins, alpha = 0.5, label = 'not ONBOUND')
+    plt.title(args.experimentName + '_' + tunes_type+' chi2/ndf')
+    plt.xlabel('chi2/ndf')
+    plt.ylabel('frequency')
+    plt.legend()
+    plt.savefig(save_location + "_chi2.pdf")
+    plt.close()
+
+# plot chi2 on same graph
+save_location = 'results/panda_graphs/'
+for tunesFile in filenames:
+    df = pd.read_csv(args.tunesFolder+'/'+tunesFile)
+
+    offbound = df.loc[df['ONBOUND'] == False]
+
+    tunes_type = tunesFile.split('/')[-1].split('.')[0]
+    
+
+    bins = np.logspace(-1,2,100)
+    plt.hist(offbound['chi2'], bins = bins, alpha = 0.5, label = tunes_type)
+
 plt.title(args.experimentName + '_' + tunes_type+' chi2/ndf')
+plt.gca().set_xscale("log")
 plt.xlabel('chi2/ndf')
 plt.ylabel('frequency')
 plt.legend()
-plt.savefig(save_location + "_chi2.pdf")
+plt.savefig(save_location + "_every_offbound_chi2.pdf")
+plt.close()
