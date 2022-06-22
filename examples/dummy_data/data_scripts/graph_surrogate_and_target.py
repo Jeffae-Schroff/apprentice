@@ -12,7 +12,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 
-#Ex: python3 ../../../../data_scripts/graph_surrogate_and_target.py myweights.txt ../../data.json val_30.json err_20.json ../../results 2_gauss_v2
+#Ex: python3 ../../../../data_scripts/graph_surrogate_and_target.py myweights.txt ../../data.json val_30.json err_20.json ../../results/surrogate_target_graphs 2_gauss_v2
 
 # mandatory arguments
 # These have to come from bash, if not appset whines about utf-8 encoding. Go figure
@@ -25,45 +25,62 @@ parser.add_argument("experimentName", help="Ex: 2_exp or 2_gauss, determines whi
 args = parser.parse_args()
 vals = importlib.import_module('set_values_' + args.experimentName)
 
+print("Reminder: visually confirm that tunes are close to target")
+GOF1 = app.appset.TuningObjective3(args.weightFile, args.dataFile, args.valFile)
+# using defaults from appset.minimize called by app-tune2
+res = GOF1.minimize(1, 1, method="tnc", tol=1e-6, saddlePointCheck=True)
+print(GOF1.printParams(res.x))
+no_err = GOF1._AS.vals(res.x)
 
-GOF = app.appset.TuningObjective3(args.weightFile, args.dataFile, args.valFile)
-# using defaults from app-tune2
-res = GOF.minimize(1, 1, method="tnc", tol=1e-6, saddlePointCheck=True)
-print(GOF.printParams(res.x))
-surrogate_values = GOF._AS.vals(res.x)
+GOF2 = app.appset.TuningObjective3(args.weightFile, args.dataFile, args.valFile, f_errors=args.errorFile)
+res = GOF2.minimize(1, 1, method="tnc", tol=1e-6, saddlePointCheck=True)
+print(GOF2.printParams(res.x))
+w_err = GOF2._AS.vals(res.x)
+
+GOF3 = app.appset.TuningObjective3(args.weightFile, args.dataFile, args.valFile, compute_cov=True)
+res = GOF3.minimize(1, 1, method="tnc", tol=1e-6, saddlePointCheck=True)
+print(GOF3.printParams(res.x))
+w_cov = GOF3._AS.vals(res.x)
+
+#place marks where to start reading in bin weights for this observable
 place = 0
-for i in range(vals.nparams):
-    bin_width = (vals.x_max[i]-vals.x_min[i])/vals.nbins[i]
-    fake_points = np.linspace(vals.x_min[i]+bin_width/2, vals.x_max[i]-bin_width/2, vals.nbins[i])
-    raw_weights = surrogate_values[place:place+vals.nbins[i]]
+#which observable we are on
+for obs in range(vals.nparams):
+    bin_width = (vals.x_max[obs]-vals.x_min[obs])/vals.nbins[obs]
+    fake_points = np.linspace(vals.x_min[obs]+bin_width/2, vals.x_max[obs]-bin_width/2, vals.nbins[obs])
 
-    #apparently weights can output Nones
-    weights = np.empty(20)
-    for j in range(vals.nbins[i]):
-        if j >= len(raw_weights) or raw_weights[j] is None:
-            weights[j] = 0
-        else:
-            weights[j] = raw_weights[j]
+    for label,surrogate_values in [('tune_no_err',no_err),('tune_w_err',w_err),('tune_w_cov',w_cov)]:      
+        raw_surrogate_weights = surrogate_values[place:place+vals.nbins[obs]]
 
-    # print(str(fake_points) + " len: " + str(len(fake_points)))
-    # print(str(raw_weights))
-    # print(str(weights) + " len: " + str(len(weights)))
-    place += vals.nbins[i]
-    plt.hist(fake_points, bins=vals.nbins[i], range=[vals.x_min[i], vals.x_max[i]], histtype='step',
-    weights=weights, label='surrogate')
+        # Apparently weights can output Nones >:(
+        # I don't fully understand the code that leads to the Nones, so some cases might end up breaking the program 
+        surrogate_weights = np.empty(vals.nbins[obs])
+        for j in range(vals.nbins[obs]):
+            if j >= len(raw_surrogate_weights) or raw_surrogate_weights[j] is None:
+                surrogate_weights[j] = 0
+            else:
+                surrogate_weights[j] = raw_surrogate_weights[j]
+        # print(str(raw_surrogate_weights))
+        # print(str(surrogate_weights) + " len: " + str(len(surrogate_weights)))
+        
+        plt.hist(fake_points, bins=vals.nbins[obs], range=[vals.x_min[obs], vals.x_max[obs]], histtype='step',
+        weights=surrogate_weights, label="MC " + label)
+    place += vals.nbins[obs]
 
     def target_func(x):
-        return vals.funcs[i](x, vals.targets)
-    scale_factor = vals.num_events(vals.targets)/(bin_width * quad(target_func, vals.x_min[i], vals.x_max[i])[0])
+        return vals.funcs[obs](x, vals.targets)
+    scale_factor = vals.num_events(vals.targets)/(bin_width * quad(target_func, vals.x_min[obs], vals.x_max[obs])[0])
     target_weights = [scale_factor * quad(target_func, x-bin_width/2, x+bin_width/2)[0] for x in fake_points]
-    plt.hist(fake_points, bins=vals.nbins[i], range=[vals.x_min[i], vals.x_max[i]], histtype='step',
-    weights=target_weights, label='target')
+    plt.hist(fake_points, bins=vals.nbins[obs], range=[vals.x_min[obs], vals.x_max[obs]], histtype='step',
+    weights=target_weights, label='Data')
 
-    plt.title(args.experimentName + ': observable ' + str(i+1) + ' number of target events: ' + str(vals.num_events(vals.targets)))
+    plt.title(args.experimentName + ': observable ' + str(obs+1))
     plt.xlabel("x")
     plt.ylabel("Number of Events")
     plt.legend()
-    plt.savefig(args.outputFolder+"/"+args.experimentName+'_'+vals.pnames[i] + ".pdf", format="pdf")
+    if args.experimentName == '2_gauss_v2':
+        plt.legend(loc = 'lower right')
+    plt.savefig(args.outputFolder+"/"+args.experimentName+'_obs'+str(obs) + ".pdf", format="pdf")
     plt.close() 
 
 

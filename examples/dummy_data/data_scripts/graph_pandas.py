@@ -22,7 +22,7 @@ for tunesFile in filenames:
     offbound = df.loc[df['ONBOUND'] == False]
 
     tunes_type = tunesFile.split('/')[-1].split('.')[0]
-    save_location = 'results/panda_graphs/' + args.experimentName.split('/')[-1] + tunes_type
+    save_location = 'results/panda_graphs/' + args.experimentName.split('/')[-1] + '_' + tunes_type
     plt.scatter(onbound[vals.pnames[0]], onbound[vals.pnames[1]], alpha = 0.5, label = 'ONBOUND')
     plt.scatter(offbound[vals.pnames[0]], offbound[vals.pnames[1]], alpha = 0.5, label = 'not ONBOUND')
     plt.title(args.experimentName + '_' + tunes_type +' many_tunes')
@@ -46,6 +46,7 @@ for tunesFile in filenames:
 
 # plot chi2 on same graph
 save_location = 'results/panda_graphs/'
+text = ''
 for tunesFile in filenames:
     df = pd.read_csv(args.tunesFolder+'/'+tunesFile)
 
@@ -53,14 +54,21 @@ for tunesFile in filenames:
 
     tunes_type = tunesFile.split('/')[-1].split('.')[0]
     
+    if args.experimentName == '2_exp':
+            bins = np.logspace(-1.5,2.5,100)
+    elif args.experimentName == '2_gauss_v2':
+            bins = np.logspace(-1.5,2.5,100)
+    else:
+        print('bins whoopies, graph_panadas')
+    weights = [1/offbound['chi2'].size]*offbound['chi2'].size
+    plt.hist(offbound['chi2'], weights = weights, bins = bins, alpha = 0.5, label = tunes_type)
+    text += tunes_type + ': ' + str(round(offbound['chi2'].mean(), 3)) + ' +/- ' + str(round(offbound['chi2'].std(), 3)) + '\n'
 
-    bins = np.logspace(-1,2,100)
-    plt.hist(offbound['chi2'], bins = bins, alpha = 0.5, label = tunes_type)
-
-plt.title(args.experimentName + '_' + tunes_type+' chi2/ndf')
+print(text)
+plt.title(args.experimentName + '_'+' chi2/ndf')
 plt.gca().set_xscale("log")
 plt.xlabel('chi2/ndf')
-plt.ylabel('frequency')
+plt.ylabel('Density')
 plt.legend()
-plt.savefig(save_location + "_every_offbound_chi2.pdf")
+plt.savefig(save_location + "/" + args.experimentName + "_every_offbound_chi2.pdf")
 plt.close()

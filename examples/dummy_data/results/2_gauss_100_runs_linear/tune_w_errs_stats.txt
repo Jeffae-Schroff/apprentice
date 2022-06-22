@@ -1,9 +1,0 @@
-
-Stats for tune_w_errs
-Parameter          Mean                Standard Deviation  Proportion boundary 
-a                   0.9423450438        0.3784648524        Did not filter
-b                   0.6198226258        0.1955477521        Did not filter
-Stats for tune_w_errs
-Parameter          Mean                Standard Deviation  Proportion boundary 
-a                   0.9382004227        0.3781030493        0.01                
-b                   0.6250055183        0.1895137682        0.01                

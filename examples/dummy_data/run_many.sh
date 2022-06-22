@@ -25,7 +25,7 @@
 #             graphs
 #                 TBD
 
-experiment_name="2_exp"       
+experiment_name="2_gauss_v2"       
 error="linear"
 experiment_folder="${experiment_name}_${error}_$(date +%m-%d-%Y_%T)"
 python3 data_scripts/mk_expr_folder.py "${experiment_folder}"
@@ -62,5 +62,9 @@ python3 ../../data_scripts/save_setup.py ../../run_many.sh ../../data_scripts/se
 python3 ../../data_scripts/param_stats.py results/many_tunes/tune_no_errs.csv "${experiment_name}" 1
 python3 ../../data_scripts/param_stats.py results/many_tunes/tune_w_errs.csv "${experiment_name}" 1
 python3 ../../data_scripts/param_stats.py results/many_tunes/tune_w_cov.csv "${experiment_name}" 1
-python3 ../../data_scripts/graph_pandas.py results/many_tunes "${experiment_name}" 
+python3 ../../data_scripts/graph_pandas.py results/many_tunes "${experiment_name}"
+push tunes/tune_0
+python3 ../../../../data_scripts/graph_surrogate_and_target.py myweights.txt ../../data.json val_30.json err_20.json \
+ ../../results/surrogate_target_graphs "${experiment_name}"
+popd 
 popd
