@@ -8,6 +8,7 @@ NTARGETPOINTS = 100000
 
 nparams = 2
 pnames = ['a', 'b']
+obs_names = ['obs1', 'obs2']
 
 #domain/range for observable funcs
 x_min = [-1, -1 ]

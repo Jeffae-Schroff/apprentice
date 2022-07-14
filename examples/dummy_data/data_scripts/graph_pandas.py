@@ -7,7 +7,7 @@ import os
 
 # python3 ../../data_scripts/graph_pandas.py results/many_tunes 2_exp
 parser = argparse.ArgumentParser()
-parser.add_argument("tunesFolder", help="file with data in .csv files from many tunes", type=str)
+parser.add_argument("tunesFolder", help="folder with data in .csv files from many tunes", type=str)
 parser.add_argument("experimentName", help="Ex: 2_exp or 2_gauss, determines which target params to give to surrogate", type=str)
 # add optional output later
 args = parser.parse_args()

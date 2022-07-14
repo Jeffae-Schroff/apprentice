@@ -12,7 +12,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 
-#Ex: python3 ../../../../data_scripts/graph_surrogate_and_target.py myweights.txt ../../data.json val_30.json err_20.json ../../results/surrogate_target_graphs 2_gauss_v2
+#Ex: python3 ../../../../data_scripts/graph_surrogates_and_target.py myweights.txt ../../data.json val_30.json err_20.json ../../results/surrogate_target_graphs 2_gauss_v2
 
 # mandatory arguments
 # These have to come from bash, if not appset whines about utf-8 encoding. Go figure
@@ -49,7 +49,7 @@ for obs in range(vals.nparams):
     bin_width = (vals.x_max[obs]-vals.x_min[obs])/vals.nbins[obs]
     fake_points = np.linspace(vals.x_min[obs]+bin_width/2, vals.x_max[obs]-bin_width/2, vals.nbins[obs])
 
-    for label,surrogate_values in [('tune_no_err',no_err),('tune_w_err',w_err),('tune_w_cov',w_cov)]:      
+    for label, surrogate_values, linestyle in [('tune_no_err',no_err,'--'),('tune_w_err',w_err,'-.'),('tune_w_cov',w_cov,':')]:      
         raw_surrogate_weights = surrogate_values[place:place+vals.nbins[obs]]
 
         # Apparently weights can output Nones >:(
@@ -63,18 +63,22 @@ for obs in range(vals.nparams):
         # print(str(raw_surrogate_weights))
         # print(str(surrogate_weights) + " len: " + str(len(surrogate_weights)))
         
-        plt.hist(fake_points, bins=vals.nbins[obs], range=[vals.x_min[obs], vals.x_max[obs]], histtype='step',
-        weights=surrogate_weights, label="MC " + label)
+        plt.hist(fake_points, bins=vals.nbins[obs], range=[vals.x_min[obs], vals.x_max[obs]], linestyle = linestyle,
+            histtype='step', weights=surrogate_weights, label="MC " + label)
     place += vals.nbins[obs]
 
     def target_func(x):
         return vals.funcs[obs](x, vals.targets)
     scale_factor = vals.num_events(vals.targets)/(bin_width * quad(target_func, vals.x_min[obs], vals.x_max[obs])[0])
-    target_weights = [scale_factor * quad(target_func, x-bin_width/2, x+bin_width/2)[0] for x in fake_points]
-    plt.hist(fake_points, bins=vals.nbins[obs], range=[vals.x_min[obs], vals.x_max[obs]], histtype='step',
-    weights=target_weights, label='Data')
+    # # Plot target histogram
+    # target_weights = [scale_factor * quad(target_func, x-bin_width/2, x+bin_width/2)[0] for x in fake_points]
+    # plt.hist(fake_points, bins=vals.nbins[obs], range=[vals.x_min[obs], vals.x_max[obs]], histtype='step',
+    # weights=target_weights, label='Data')
+    x = np.linspace(vals.x_min[obs], vals.x_max[obs], 200)
+    y = target_func(x)*scale_factor
+    plt.plot(x,y)
 
-    plt.title(args.experimentName + ': observable ' + str(obs+1))
+    plt.title(args.experimentName + ': observable ' + str(obs+1) + "; targets: " + str(vals.targets))
     plt.xlabel("x")
     plt.ylabel("Number of Events")
     plt.legend()

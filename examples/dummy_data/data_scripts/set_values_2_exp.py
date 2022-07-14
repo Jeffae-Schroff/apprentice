@@ -25,6 +25,7 @@ def func2(x, params):
     return np.exp(a*x+b*x**3)
 funcs = [func1, func2]
 func_strs = ['e^(ax+bx^2)', 'e^(ax+bx^3)']
+obs_names = ['obs1', 'obs2']
 
 p_min =  [1,  -1.2]
 p_max =  [2,  -0.8]
