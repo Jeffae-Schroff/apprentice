@@ -1,9 +1,0 @@
-
-Stats for tune_w_errs.csv
-Parameter          Mean                Standard Deviation  Proportion boundary 
-a                   1.0477803793        0.020183568         Did not filter
-b                   3.0191833365        0.0700197895        Did not filter
-ONBOUND filtered stats for tune_w_errs.csv
-Parameter          Mean                Standard Deviation  Proportion boundary 
-a                   1.0477803793        0.020183568         0.0                 
-b                   3.0191833365        0.0700197895        0.0                 

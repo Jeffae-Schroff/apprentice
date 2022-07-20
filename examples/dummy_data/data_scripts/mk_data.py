@@ -8,21 +8,16 @@ from math import ceil
 import matplotlib.pyplot as plt
 import importlib
 
-"""
-Exponential Distribution
-"""
-
-
 parser = argparse.ArgumentParser()
 
 # mandatory arguments
-parser.add_argument("experimentName", help="Ex: 2_exp or 2_gauss, determines which set_values to use and name of save folder", type=str)
+parser.add_argument("experimentName", help="Ex: 2_exp, determines which values to use and name of save folder", type=str)
 parser.add_argument("errorType", help="linear, low_linear", type=str)
 
 # Parse arguments
 args = parser.parse_args()
 print("Running mk_data.py: " + args.experimentName + " observables, " + args.errorType + " error")
-vals = importlib.import_module('set_values_' + args.experimentName)
+vals = importlib.import_module(args.experimentName)
 
 # #saves observable graphs here for transferring to results folder later
 # observable_folder = 'many_tunes/observables'
@@ -38,7 +33,7 @@ def main():
     
     make_target_scatter(vals.funcs)
 
-    np.random.seed(42) #does this mean param value samples are deterministic?
+    np.random.seed(42)
 
     every_histo_point = []
     for j in range(vals.num_folders):

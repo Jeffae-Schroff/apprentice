@@ -11,7 +11,7 @@ add_arg("tuneType", help="tune_no_errs, tune_w_errs, tune_w_cov")
 
 args = parser.parse_args()
 
-vals = importlib.import_module('set_values_' + args.experimentName)
+vals = importlib.import_module(args.experimentName)
 
 json_data = {'chain-0':{}}
 D = json_data['chain-0']

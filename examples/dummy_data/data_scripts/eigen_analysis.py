@@ -16,6 +16,34 @@ from apprentice.appset import TuningObjective2
 from apprentice.appset import TuningObjective3
 from scipy.stats import chi2 as chi2pdf
 
+# python3 ../../data_scripts/eigen_analysis.py 2_exp --use-wfile
+
+import argparse
+parser = argparse.ArgumentParser(description="Eigen Tune studies")
+add_arg = parser.add_argument
+# add_arg("--filename", help="input filename", default='results/eigen_tunes/tune_no_errs_eigen_input.json')
+add_arg("experiment_name", help="2_exp, for example")
+add_arg("--outname", help="output filename", default='results/eigen_tunes/result.txt')
+
+add_arg("--expdata", help='experimental data json file', default="data.json")
+add_arg("--tunes_folder", help='folder with many recorded tunes, tune_0, tune_1 etc.', default="tunes")
+add_arg("--use-wfile", help='use weight files', action='store_true')
+add_arg("--normalize-weights", help='normalize weights', action='store_true')
+add_arg("--dof-scale", help='scaling the targeting nDoF', type=float, default=1.0)
+add_arg("--cl", help='confidence level', type=float, default=0.68268949)
+add_arg("--weighted-chi2", help='use weighted chi2', action='store_true')
+parser.add_argument("--outputFolder", help="folder to put out graph", default="results/important_graphs/", type=str)
+
+
+
+args = parser.parse_args()
+vals = importlib.import_module(args.experiment_name, package=__name__)
+tune_types = ['tune_no_errs','tune_w_errs','tune_w_cov']
+
+approx_path = '/val_30.json'
+errapprox_path = '/err_20.json'
+weights_path = '/myweights.txt'
+
 
 def readReport(fname):
     """
@@ -283,8 +311,8 @@ def graph_contour(tune_type, levels, center, tune_colors):
     else:
         print(tune_type + ' invalid tune type in build_model')
 
-    s1 = 50
-    s2 = 50
+    s1 = 100
+    s2 = 100
 
     p1 = np.linspace(vals.p_min[0], vals.p_max[0], s1)
     p2 = np.linspace(vals.p_min[1], vals.p_max[1], s2)
@@ -302,38 +330,14 @@ def graph_contour(tune_type, levels, center, tune_colors):
     
     colors = None
     if tune_colors != None:
-        colors = next(tune_colors)
+        color = next(tune_colors)
+    plt.plot(center[0], center[1], 'o', color=color,markersize=1.5) 
     if levels == None:
-        return ax.contour(x,y,z, colors = colors)
-    return ax.contour(x,y,z,levels, colors = colors)
+        return ax.contour(x,y,z, colors = color)
+    return ax.contour(x,y,z,levels, colors = color)
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Eigen Tune studies")
-    add_arg = parser.add_argument
-    # add_arg("--filename", help="input filename", default='results/eigen_tunes/tune_no_errs_eigen_input.json')
-    add_arg("--outname", help="output filename", default='results/eigen_tunes/result.txt')
-    add_arg("--experiment_name", help="2_exp, 2_gauss for example")
-
-    # add_arg("--approx", help="Approximation json file", default="tunes/tune_0/val_30.json")
-    add_arg("--expdata", help='experimental data json file', default="data.json")
-    # add_arg("--weights", help='weight file', default='tunes/tune_0/myweights.txt')
-    # add_arg("--errapprox", help='error approximation', default="tunes/tune_0/err_20.json")
-    add_arg("--tunes_folder", help='folder with many recorded tunes, tune_0, tune_1 etc.', default="tunes")
-    add_arg("--use-wfile", help='use weight files', action='store_true')
-    add_arg("--normalize-weights", help='normalize weights', action='store_true')
-    add_arg("--dof-scale", help='scaling the targeting nDoF', type=float, default=1.0)
-    add_arg("--cl", help='confidence level', type=float, default=0.68268949)
-    add_arg("--weighted-chi2", help='use weighted chi2', action='store_true')
-
-    args = parser.parse_args()
-    vals = importlib.import_module('set_values_' + args.experiment_name)
-    tune_types = ['tune_no_errs','tune_w_errs','tune_w_cov']
-    
-    approx_path = '/val_30.json'
-    errapprox_path = '/err_20.json'
-    weights_path = '/myweights.txt'
-    # find tune with all offbound, we just assume many_tunes exists
+    # find tune with all offbound, we just assume many_tunes exists in our folder
     dfs = {}
     for tune_file in tune_types:
         dfs[tune_file] = pd.read_csv('results/many_tunes/'+tune_file+'.csv')
@@ -350,6 +354,7 @@ if __name__ == "__main__":
            break
     print('Using tune_' + str(offbound_num))
 
+    #graph ellipse
     tune_colors = cycle(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
           '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'])
     target_dev={}
@@ -367,8 +372,9 @@ if __name__ == "__main__":
     ax.set_xlim(vals.p_min[0],vals.p_max[0])
     ax.set_ylim(vals.p_min[1],vals.p_max[1])
     plt.legend()
-    plt.savefig('results/eigen_tunes/boundary_ellipse.pdf')
+    plt.savefig(args.outputFolder + 'boundary_ellipse.pdf')
 
+    #graph contour
     plt.figure()
     fig, ax = plt.subplots()
     tune_colors = cycle(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
@@ -378,27 +384,27 @@ if __name__ == "__main__":
         legend_temp,_ = graph_contour(tune_type, [target_dev[tune_type]], center[tune_type], tune_colors).legend_elements()
         objects.append(legend_temp[0])
     #wrong if target_dev changes between tunes
-    plt.title("boundary region for " + args.experiment_name.format(val = target_dev['tune_w_cov']))
+    plt.title("chi2 boundary region for " + args.experiment_name.format(val = target_dev['tune_w_cov']))
     plt.xlabel('a')
     plt.ylabel('b')
     # ax.set_aspect('equal')
     ax.set_xlim(vals.p_min[0],vals.p_max[0])
     ax.set_ylim(vals.p_min[1],vals.p_max[1])
     ax.legend(objects, tune_types)
-    plt.savefig('results/eigen_tunes/boundary_contour.pdf')
+    plt.savefig(args.outputFolder + 'boundary_contour.pdf')
 
 
-    plt.title("chi2 boundary region from eigenvectors (ellipse) for " + args.experiment_name)
-    plt.xlabel('a')
-    plt.ylabel('b')
-    # ax.set_aspect('equal')
-    ax.set_xlim(vals.p_min[0],vals.p_max[0])
-    ax.set_ylim(vals.p_min[1],vals.p_max[1])
-    plt.legend()
-    plt.savefig('results/eigen_tunes/boundary_ellipse.pdf')
+    # plt.title("chi2 boundary region from eigenvectors (ellipse) for " + args.experiment_name)
+    # plt.xlabel('a')
+    # plt.ylabel('b')
+    # # ax.set_aspect('equal')
+    # ax.set_xlim(vals.p_min[0],vals.p_max[0])
+    # ax.set_ylim(vals.p_min[1],vals.p_max[1])
+    # plt.legend()
+    # plt.savefig('results/eigen_tunes/boundary_ellipse.pdf')
 
-    tune_colors = cycle(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-          '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'])
+    # tune_colors = cycle(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+    #       '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'])
 
     # gen_levels = [10,20,50,100,200,500]
     # graph_ellipse = [True, True, True]

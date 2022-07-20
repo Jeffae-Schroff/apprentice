@@ -1,5 +1,5 @@
 # adds error to the inputdata.h5 file using the observation_error function
-# (which is stored in the set_values file corresponding with the experimentName it is given)
+# (which is stored in the file corresponding with the experimentName it is given)
 
 import importlib
 import h5py
@@ -15,7 +15,7 @@ parser.add_argument("h5File", help="where Data and MC are written to", type=str)
 # Parse arguments
 args = parser.parse_args()
 print("Running " + args.experimentName + " with " + args.errorType)
-vals = importlib.import_module('set_values_' + args.experimentName)
+vals = importlib.import_module(args.experimentName)
 
 f = h5py.File(args.h5File, "r+")
 

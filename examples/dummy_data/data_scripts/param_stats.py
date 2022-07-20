@@ -24,7 +24,7 @@ args = parser.parse_args()
 #filter out boundary values or not
 filter = True
 
-vals = importlib.import_module('set_values_' + args.experimentName)
+vals = importlib.import_module(args.experimentName)
 
 if(not os.path.exists(args.filepath)):
     print('file given to param_stats.py does not exist')
