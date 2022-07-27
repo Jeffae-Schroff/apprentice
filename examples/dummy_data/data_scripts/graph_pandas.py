@@ -68,7 +68,7 @@ for tunesFile in filenames:
     plt.hist(offbound['chi2'], weights = weights, bins = bins, alpha = 0.5, label = tune_stats)
 
 print(text)
-plt.title(args.experimentName + '_'+' chi2/ndf')
+plt.title(args.experimentName +' chi2/ndf')
 plt.gca().set_xscale("log")
 plt.xlabel('chi2/ndf')
 plt.ylabel('Density')

@@ -1,9 +1,0 @@
-
-Stats for tune_w_cov.csv
-Parameter          Mean                Standard Deviation  Proportion boundary 
-a                   1.24498491          0.2510153786        Did not filter
-b                   -0.9754913127       0.1315400403        Did not filter
-ONBOUND filtered stats for tune_w_cov.csv
-Parameter          Mean                Standard Deviation  Proportion boundary 
-a                   1.4830933394        0.0055281392        0.5                 
-b                   -0.9965632319       0.0028676703        0.5                 

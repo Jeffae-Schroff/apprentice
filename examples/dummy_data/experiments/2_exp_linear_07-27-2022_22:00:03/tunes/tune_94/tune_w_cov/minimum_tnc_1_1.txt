@@ -1,0 +1,10 @@
+# Objective value at best fit point: 187.30 (187.30 without weights)
+# Degrees of freedom: 34
+# chi2/ndf: 5.509
+# Minimisation took 3.37 seconds
+# Command line: /usr/bin/app-tune2 myweights.txt ../../data.json val_30.json --computecov True -o tune_w_cov
+# Best fit point:#
+# PNAME	 PVALUE             #    COMMENT    [  PLOW                ...   PHIGH              ]
+#
+a     	 1.4107924094703663 #               [  1.0169554462683554  ...   1.9690526520659972 ]
+b     	-1.1975713594197395 # ONBOUND       [ -1.1975713594197395  ...  -0.8008338275110564 ]
