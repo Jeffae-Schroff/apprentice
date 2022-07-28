@@ -4,7 +4,7 @@ It can also generate mock target data and Monte Carlo runs for apprentice.
 
 Basic Instructions:
 How to reproduce the graphs of the 2_exp mock data (two exponential observables):
-Have your enviroment set up to run apprentice, then execute "bash run_many.sh" in this folder (examples/dummy_data).
+Set up your environment to run apprentice, then execute "bash run_many.sh" in this folder (examples/dummy_data).
 Once the code has finished running, the most important graphs are stored in experiment/2_exp_linear(timestamp)/results/important_graphs
 
 How to run a new mock data experiment:
@@ -29,7 +29,7 @@ After all of these tunes are completed, we can analyse how covariance preformed 
 [chi_2 graph example](experiments\2_exp_linear_07-27-2022_22-00-03/results/important_graphs/2_exp_every_offbound_chi2.pdf)
 Over many tunes, we record the chi2/ndf that apprentice gets, and graph by method of error handling. We also throw out tunes where apprenteice hits the boundary parameters when tuning and gets stuck (OFFBOUND).
 
-[boundary_counter example](experiments\2_exp_linear_07-27-2022_22-00-03/results/important_graphs/boundary_contour.pdf)
-For this example with two parameters, we can run a contour to find the area around a tune parameter result that is within a certain chi2 margin.
+[boundary_contour example](experiments\2_exp_linear_07-27-2022_22-00-03/results/important_graphs/boundary_contour.pdf)
+For this example with two parameters, we can run a contour to find the area around a tune parameter result that is within a certain chi2 margin. There is also a elipse generated using the eigenvectors as axes; when the contour cannot be calculated, the ellipse will likely be a good approximation. This one 
 
-
+[validation example](experiments\2_exp_linear_07-27-2022_22-00-03/results/important_graphs/boundary_contour.pdf)

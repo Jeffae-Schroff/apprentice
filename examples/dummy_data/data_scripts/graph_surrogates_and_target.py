@@ -78,7 +78,7 @@ for obs in range(vals.nparams):
     y = target_func(x)*scale_factor
     plt.plot(x,y,label = 'target')
 
-    plt.title(args.experimentName + ': observable ' + str(obs+1))
+    plt.title(args.experimentName + ': obs'+str(obs))
     plt.xlabel("x")
     plt.ylabel("Number of Events")
     plt.legend()
