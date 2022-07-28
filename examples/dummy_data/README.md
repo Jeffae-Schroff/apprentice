@@ -3,14 +3,17 @@ with graphs that compare the preformance of covariance matrix method of handling
 It can also generate mock target data and Monte Carlo runs for apprentice.
 
 Basic Instructions:
+
 How to reproduce the graphs of the 2_exp mock data (two exponential observables):
 Set up your environment to run apprentice, then execute "bash run_many.sh" in this folder (examples/dummy_data).
 Once the code has finished running, the most important graphs are stored in experiment/2_exp_linear(timestamp)/results/important_graphs
 
 How to run a new mock data experiment:
+
 Use the 2_exp.py file as a template, create your own .py file and fill in the needed information. Set experiment_name in run_many.sh to the name of your .py file, then execute bash run_many.sh
 
 run_many.sh Bash Script Walkthrough:
+
 This is the main driver script that will run an experiment automatically if the setup is correct. First, we create a new folder in /experiments to hold all our data and results.
 
 Apprentice requires two sets of information to run a tune: the target data(Data folder), and the Monte Carlo runs(MC folder). These are the DATADIR and INPUT dir from this tutorial: https://iamholger.gitbook.io/apprentice/5-minute-tuning-tutorial
