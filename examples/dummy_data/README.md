@@ -19,7 +19,7 @@ run_many.sh Bash Script Walkthrough:
 
 This is the main driver script that will run an experiment automatically if the setup is correct. First, we create a new folder in /experiments to hold all our data and results.
 
-Apprentice requires two sets of information to run a tune: the target data(Data folder), and the Monte Carlo runs(MC folder). These are the DATADIR and INPUT dir from this tutorial: https://iamholger.gitbook.io/apprentice/5-minute-tuning-tutorial
+Apprentice requires two sets of information to run a tune: the target data(Data folder), and the Monte Carlo runs(MC folder). These are the DATADIR and INPUTDIR from this tutorial: https://iamholger.gitbook.io/apprentice/5-minute-tuning-tutorial
 
 This code can either generate mock data using observable functions and other parameters from a preset file, or it can copy MC and Data folders from the same directory as run_many.sh. This behavior depends on the mock_data boolean. When generating mock data, mk_data.py generates many random points under an observable function under given ranges and bins them to make the Monte Carlo runs and target data. mk_data.py also takes an observable_error function, typically a percentage between 5 and 20%. It will change the height of each bin using a normal distribution with nominal height as mean and the error function times the height as std. After the MC data is collected into inputdata.h5, add_err changes the errors in h5 file to reflect the change that mk_data has been made. 
 
