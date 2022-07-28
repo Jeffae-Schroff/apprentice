@@ -1,3 +1,0 @@
-warning in stationary: failed to import cython module: falling back to numpy
-warning in coregionalize: failed to import cython module: falling back to numpy
-warning in choleskies: failed to import cython module: falling back to numpy

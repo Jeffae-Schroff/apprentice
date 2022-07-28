@@ -383,6 +383,7 @@ if __name__ == "__main__":
     for tune_type in tune_types:
         legend_temp,_ = graph_contour(tune_type, [target_dev[tune_type]], center[tune_type], tune_colors).legend_elements()
         objects.append(legend_temp[0])
+    plt.plot(vals.targets[0], vals.targets[1],'ro',markersize=1.5,label = 'target params')
     #wrong if target_dev changes between tunes
     plt.title("chi2 boundary region for " + args.experiment_name.format(val = target_dev['tune_w_cov']))
     plt.xlabel('a')
