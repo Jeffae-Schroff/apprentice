@@ -25,18 +25,18 @@ This code can either generate mock data using observable functions and other par
 
 Regardless of the dataset's source, apprentice uses app-datadirtojson to combine Data into data.json, and app-yoda2h5 to combine the MC folder into inputdata.h5. We then use mc_envelope.py to make envelope graphs of the MC runs. Apprentice will probably fail if the target data does not fall mostly within the MC envelope.
 
-![mc_envelope example](experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/observable_envelopes/func0.pdf)
+![mc_envelope example](/experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/observable_envelopes/func0.pdf)
 An example with the 2_exp mock data.
 
 Now that our dataset is prepared, we will run many similar tunes on this data to evaluate the preformance of the covariance method of handling error versus two of apprentice's existing methods. Each loop, apprentice will calculate the covariance matrix and fit functions of the form given by --order to each indiviual value bin and error bin across observables. If the --sample option is used, it will sample that number of MC runs to fit with. Then, the fits are used to tune the target parameters, with each of the three methods. Every file generated in this process is in a numbered tune folder in /experiments/(experiment name and time)/tunes. 
 
 After all of these tunes are completed, we can analyse how covariance preformed against the other methods. Here is an overiew of important results:
 
-![chi_2 graph example](experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/2_exp_every_offbound_chi2.pdf)
+![chi_2 graph example](/experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/2_exp_every_offbound_chi2.pdf)
 Over many tunes, we record the chi2/ndf that apprentice gets, and graph by method of error handling. We also throw out tunes where apprenteice hits the boundary parameters when tuning and gets stuck (OFFBOUND).
 
-![boundary_contour example](experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/boundary_contour.pdf)
+![boundary_contour example](/experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/boundary_contour.pdf)
 For this example with two parameters, we can run a contour to find the area around a tune parameter result that is within a certain chi2 margin. There is also a elipse generated using the eigenvectors as axes; when the contour cannot be calculated, the ellipse will likely be a good approximation. Both scripts use the first tune in the tunes folder where none of the three methods resulted in OFFBOUND
 
-![validation example](experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/tune_validations/2_exp_obs0_tune_validation.pdf)
+![validation example](/experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/tune_validations/2_exp_obs0_tune_validation.pdf)
 To make sure that apprentice has tuned well, we can plug the results of each tune into the surrogate functions, and graph the results with the target data.
