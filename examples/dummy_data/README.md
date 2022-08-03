@@ -1,6 +1,6 @@
 Introduction:
 -------
-Apprentice is a tool that fits rational functions to Monte Carlo runs, then uses them to tune the parameters of target data. This folder demonstrates the advantages of an addition to Apprentice: an new way to handle error with the covariance matrix. The code can generate mock data and MC runs for its tests, or import a real dataset
+Apprentice is a tool that fits rational functions to Monte Carlo runs, then uses them to tune the parameters of target data. This folder demonstrates the advantages of an addition to Apprentice: an new way to handle error with the covariance matrix. The code can generate mock data and MC runs for its tests, or import a real dataset.
 
 Basic Instructions:
 -------
@@ -36,7 +36,7 @@ After all of these tunes are completed, we can analyse how covariance preformed 
 Over many tunes, we record the chi2/ndf that apprentice gets, and graph by method of error handling. We also throw out tunes where apprenteice hits the boundary parameters when tuning and gets stuck (OFFBOUND).
 
 ![boundary_contour example](experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/pngs/boundary_contour.png)
-For this example with two parameters, we can run a contour to find the area around a tune parameter result that is within a certain chi2 margin. There is also a elipse generated using the eigenvectors as axes; when the contour cannot be calculated, the ellipse will likely be a good approximation. Both scripts use the first tune in the tunes folder where none of the three methods resulted in OFFBOUND
+For this example with two parameters, we can run a contour to find the area around a tune parameter result that is within a certain chi2 margin. There is also a boundary_elipse.pdf file generated using the smallest and largest maginitude eigenvectors as axes; when the contour cannot be calculated, the ellipse will likely be a good approximation. Both scripts use the first tune in the tunes folder where none of the three methods resulted in OFFBOUND
 
 ![validation example](experiments/2_exp_linear_07-28-2022_00:20:56/results/important_graphs/pngs/2_exp_obs0_tune_validation.png)
 To make sure that apprentice has tuned well, we can plug the results of each tune into the surrogate functions, and graph the results with the target data.
