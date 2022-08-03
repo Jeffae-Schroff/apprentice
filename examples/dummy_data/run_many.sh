@@ -22,7 +22,7 @@
 #                 tune_no_errs.csv
 #                 tune_w_errs.csv
 #                 tune_w_cov.csv
-#             TBD
+#             graphs, etc.
 
 experiment_name="2_exp" 
 error="linear"

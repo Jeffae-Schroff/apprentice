@@ -13,6 +13,7 @@ import numpy as np
 parser = argparse.ArgumentParser()
 
 #Ex: python3 ../../../../data_scripts/graph_surrogates_and_target.py myweights.txt ../../data.json val_30.json err_20.json 2_exp
+# running from a folder in tunes
 
 # mandatory arguments
 # These have to come from bash, if not appset throws error about utf-8 encoding. Go figure
@@ -42,18 +43,18 @@ res = GOF3.minimize(1, 1, method="tnc", tol=1e-6, saddlePointCheck=True)
 print(GOF3.printParams(res.x))
 w_cov = GOF3._AS.vals(res.x)
 
-#place marks where to start reading in bin weights for this observable
+#place marks where to start reading in bin weights for the observable being read
 place = 0
-#which observable we are on
+#obs: which observable we are processing
 for obs in range(vals.nparams):
     bin_width = (vals.x_max[obs]-vals.x_min[obs])/vals.nbins[obs]
     fake_points = np.linspace(vals.x_min[obs]+bin_width/2, vals.x_max[obs]-bin_width/2, vals.nbins[obs])
-
-    for label, surrogate_values, linestyle in [('tune_no_err',no_err,'--'),('tune_w_err',w_err,'-.'),('tune_w_cov',w_cov,':')]:      
+    
+    for label, surrogate_values, linestyle in [('tune_no_err',no_err,'--'),('tune_w_err',w_err,'-.'),('tune_w_cov',w_cov,'-')]:      
         raw_surrogate_weights = surrogate_values[place:place+vals.nbins[obs]]
 
         # Apparently weights can output Nones >:(
-        # I don't fully understand the code that leads to the Nones, so some cases might end up breaking the program 
+        # If the program breaks, this is a great place to look.
         surrogate_weights = np.empty(vals.nbins[obs])
         for j in range(vals.nbins[obs]):
             if j >= len(raw_surrogate_weights) or raw_surrogate_weights[j] is None:
@@ -64,7 +65,7 @@ for obs in range(vals.nparams):
         # print(str(surrogate_weights) + " len: " + str(len(surrogate_weights)))
         
         plt.hist(fake_points, bins=vals.nbins[obs], range=[vals.x_min[obs], vals.x_max[obs]], linestyle = linestyle,
-            histtype='step', weights=surrogate_weights, label="MC " + label)
+            histtype='step', alpha = 0.5, weights=surrogate_weights, label="MC " + label)
     place += vals.nbins[obs]
 
     def target_func(x):
@@ -77,14 +78,15 @@ for obs in range(vals.nparams):
     x = np.linspace(vals.x_min[obs], vals.x_max[obs], 200)
     y = target_func(x)*scale_factor
     plt.plot(x,y,label = 'target')
-
-    plt.title(args.experimentName + ': obs'+str(obs))
+    tune_folder = os.getcwd().split('/')[-1]
+    plt.title(args.experimentName + ': obs'+str(obs)+ ' (from '+tune_folder+')')
     plt.xlabel("x")
     plt.ylabel("Number of Events")
     plt.legend()
     if args.experimentName == '2_gauss_v2':
         plt.legend(loc = 'lower right')
-    plt.savefig(args.outputFolder+args.experimentName+'_obs'+str(obs) + "_tune_validation" + ".pdf", format="pdf")
+    
+    plt.savefig(args.outputFolder+args.experimentName+'_obs'+str(obs) + "_"+tune_folder+"_validation" + ".pdf", format="pdf")
     plt.close() 
 
 
