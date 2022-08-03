@@ -1,6 +1,6 @@
-This code uses run_many.sh to run apprentice many times on a dataset. It will store a results folder in an experiments folder,
-with graphs that compare the preformance of covariance matrix method of handling error with apprentice's older methods.
-It can also generate mock target data and Monte Carlo runs for apprentice.
+Introduction:
+-------
+Apprentice is a tool that fits rational functions to Monte Carlo runs, then uses them to tune the parameters of target data. This folder demonstrates the advantages of an addition to Apprentice: an new way to handle error with the covariance matrix. The code can generate a mock dataset for its tests, or import real data and MC runs.
 
 Basic Instructions:
 -------
