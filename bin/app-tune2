@@ -107,7 +107,7 @@ op.add_option("--objective", help="self-defined objective function in a python f
 opts, args = op.parse_args()
 
 
-if opts.ALG not in ["tnc", "ncg", "lbfgsb" ,"trust"]:
+if opts.ALG not in ["tnc", "ncg", "lbfgsb" ,"trust", "trust-jax"]:
     raise Exception("Minimisation algorithm {} not implemented, should be tnc, ncg, lbfgsb or trust, exiting".format(opts.ALG))
 
 #TODO add protections and checks if files exist etc

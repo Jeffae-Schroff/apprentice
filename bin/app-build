@@ -132,6 +132,13 @@ if __name__ == "__main__":
             sys.stdout.flush()
             continue
 
+        # #Should prevent the ValueError in polynomialapproximation from happening--doesn't
+        # if opts.computecov and len(X) <= app.tools.numCoeffsRapp(len(X[0]),order=(M,N)):
+        #     print("the number of MC runs {} must be larger than the number of weights {}".format(len(X), app.tools.numCoeffsRapp(len(X[0]),order=(M,N)), binids[rankIdx[num]]))
+        #     import sys
+        #     sys.stdout.flush()
+        #     continue
+
         if opts.ERRS:
             temp,  hasPole = app.tools.calcApprox(X, E, (M,N), pnames, opts.MODE,
                 debug=opts.DEBUG, testforPoles=opts.TESTPOLES, ftol=opts.FTOL, itslsqp=opts.ITSLSQP)

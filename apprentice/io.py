@@ -338,8 +338,14 @@ def indexMapH5(fname, lsub):
     import h5py
 
     with h5py.File(fname, "r") as f: II = [x.decode() for x in f.get("index")[:]]
-    if len(lsub) == 0: lsub = np.unique([x.split("#")[0] for x in II])
-    return {ls: np.where(np.char.find(II, ls) > -1)[0] for ls in lsub}
+    # every bin name (without '#n) is a key, the indicies with that bin name are values
+    D = {}
+    [D.setdefault(bin.split('#')[0], []).append(i) for i,bin in enumerate(II)]
+    return D
+    # this searches the whole index array once per element of lsub, 
+    # For the new experiment, Searching ~400,000 strings ~4,000 times is slow.
+    # if len(lsub) == 0: lsub = np.unique([x.split("#")[0] for x in II])
+    # return {ls: np.where(np.char.find(II, ls) > -1)[0] for ls in lsub}
 
 
 def readIndexH5(fname):
@@ -363,7 +369,7 @@ def readPnamesH5(fname, xfield):
     import h5py
 
     with h5py.File(fname, "r") as f:
-        pnames = [p.astype(str) for p in f.get(xfield).attrs["names"]]
+        pnames = [str(p) for p in f.get(xfield).attrs["names"]]
         print("parameter names: ", pnames)
 
     return pnames

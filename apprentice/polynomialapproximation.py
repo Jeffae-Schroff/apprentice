@@ -1,3 +1,4 @@
+from cgi import print_arguments
 import numpy as np
 import apprentice
 
@@ -47,8 +48,10 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
             X = np.array(X, dtype=np.float64)
             Y = np.array(Y, dtype=np.float64)
             bad_data = (Y == apprentice.io.INVALID_NUMBER)
+            print('1 X: ',X, 'Y: ',Y)
             X = X[~bad_data]
             Y = Y[~bad_data]
+            print('2 X: ',X, 'Y: ',Y)
             self._m=order
             self._scaler = apprentice.Scaler(np.atleast_2d(X), a=scale_min, b=scale_max, pnames=pnames)
             self._X   = self._scaler.scaledPoints
@@ -57,6 +60,7 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
             self._trainingsize=len(X)
             if self._dim==1: self.recurrence=apprentice.monomial.recurrence1D
             else           : self.recurrence=apprentice.monomial.recurrence
+            print('3 X: ',X, 'Y: ',Y)
             self.fit(strategy=strategy, computecov=computecov)
         else:
             raise Exception("Constructor not called correctly, use either fname, initDict or X and Y")
@@ -113,15 +117,25 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         """
         Do everything
         """
+        # print('from fit:',self._Y.shape[0])
         from apprentice import tools
         n_required = tools.numCoeffsPoly(self.dim, self.m)
         if n_required > self._Y.shape[0]:
-            raise Exception("Not enough inputs: got %i but require %i to do m=%i"%(self._Y.shape[0], n_required, self.m))
+            # raise Exception("Not enough inputs: got %i but require %i to do m=%i"%(self._Y.shape[0], n_required, self.m))
+            print("Not enough inputs: got %i but require %i to do m=%i"%(self._Y.shape[0], n_required, self.m))
+            
+            return
 
         self.setStructures()
 
         from apprentice import monomial
         VM = monomial.vandermonde(self._X, self.m)
+        # print('x: ', self._X)
+        # print('vm: \n',  VM)
+        # f = open("VM_old.txt", "w")
+        # f.write('x: '+ str(self._X) + '\n VM: \n'+  str(VM))
+        # f.close()
+
         strategy=kwargs["strategy"] if kwargs.get("strategy") is not None else 1
         if   strategy==1: self.coeffSolve( VM)
         elif strategy==2: self.coeffSolve2(VM)
@@ -131,7 +145,7 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         if kwargs.get("computecov"):
             cov = np.linalg.inv(VM.T@VM)
             if VM.shape[0] <= VM.shape[1]:
-                raise ValueError("the number of MC runs {} must larger than the number of weights {}".format(*VM.shape))
+                raise ValueError("the number of MC runs {} must be larger than the number of weights {}".format(*VM.shape))
             fac = self._resids / (VM.shape[0]-VM.shape[1])
             self._cov = cov*fac
 

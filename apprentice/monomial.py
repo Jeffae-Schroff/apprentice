@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit, njit
 
-@njit
+# @njit
 def mono_next_grlex(m, x):
     #  Author:
     #
@@ -92,6 +92,35 @@ def vandermonde(params, order):
         V = np.ones((tools.numCoeffsPoly(dim, order), *params.shape), dtype=np.float64)
         np.power(params, s[:, np.newaxis], out=(V), where=s[:, np.newaxis]>0)
         return np.prod(V, axis=2).T
+
+def vandermonde_jax(params, order):
+    """
+    Construct the Vandermonde matrix.
+    """
+    import jax.numpy as jnp
+    try:
+        dim = len(params[0])
+    except:
+        dim = 1
+
+    
+    from apprentice import tools
+    if dim == 1:
+        s = jnp.array(range(order))
+    else:
+        ncmax = tools.numCoeffsPoly(dim, order)
+        term_list = [[0]*dim]
+        for i in range(1, ncmax):
+            term_list.append(mono_next_grlex(dim, term_list[-1][:]))
+        s = jnp.array(term_list)
+    
+    if len(params[0]) == 1:
+        V = jnp.zeros((len(params), tools.numCoeffsPoly(dim, order)), dtype=jnp.float64)
+        for a, p in enumerate(params): V[a]=recurrence1D(p, s)
+        return V
+    else:
+        V = jnp.power(params, s[:, jnp.newaxis])
+        return jnp.prod(V, axis=2).T
 
 if __name__=="__main__":
     print(monomialStructure(2,3))

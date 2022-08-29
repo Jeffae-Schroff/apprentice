@@ -442,6 +442,7 @@ class TuningObjective2(object):
         else:        return apprentice.tools.fast_chi(self._W2[sel]     , self._Y[sel] - vals, 1./(err2 + 1./self._E2[sel]))# self._E2[sel])
 
     def gradient(self, _x, sel=slice(None, None, None)):
+        
         x=self.mkPoint(_x)
         vals  = self._AS.vals( x, sel=sel)
         E2=1./self._E2[sel]
@@ -452,6 +453,8 @@ class TuningObjective2(object):
         else:
             err= np.zeros_like(vals)
             egrads = np.zeros_like(grads)
+        print('grad no jax')
+        print(x, apprentice.tools.fast_grad2(self._W2[sel], self._Y[sel] - vals, E2, err, grads, egrads)[self._freeIdx])
         return apprentice.tools.fast_grad2(self._W2[sel], self._Y[sel] - vals, E2, err, grads, egrads)[self._freeIdx]
 
     def hessian(self, _x, sel=slice(None, None, None)):
@@ -590,6 +593,7 @@ class TuningObjective2(object):
                 if   method=="tnc":    res = self.minimizeTNC(   x0, sel, tol=tol)
                 elif method=="ncg":    res = self.minimizeNCG(   x0, sel, tol=tol)
                 elif method=="trust":  res = self.minimizeTrust( x0, sel, tol=tol)
+                elif method=="trust-jax":  res = self.minimizeTrustJax( x0, sel, tol=tol)
                 elif method=="lbfgsb": res = self.minimizeLBFGSB(x0, sel, tol=tol)
                 else: raise Exception("Unknown minimiser {}".format(method))
                 print("Fitted Result: ", res.x)
@@ -714,6 +718,16 @@ class TuningObjective2(object):
                 method="trust-exact")
         return res
 
+    def minimizeTrustJax(self, x0, sel=slice(None, None, None), tol=1e-6):
+        from scipy import optimize
+        res = optimize.minimize(
+                lambda x: self.objective(x, sel=sel),
+                x0,
+                jac=lambda x:self.gradient(x, sel=sel),
+                hess=lambda x:self.hessian(x, sel=sel),
+                method="trust-exact")
+        return res
+
     def minimizeNCG(self, x0, sel=slice(None, None, None), tol=1e-6):
         from scipy import optimize
         res = optimize.minimize(
@@ -829,6 +843,8 @@ class TuningObjective2(object):
 
 import jax.numpy as jnp
 import jax
+from jax.config import config
+config.update("jax_enable_x64", True)
 from jax import jacfwd, jacrev
 class TuningObjective3(TuningObjective2):
     def __init__(self, *args, **kwargs):
@@ -875,9 +891,11 @@ class TuningObjective3(TuningObjective2):
     def gradient(self, _x, sel=slice(None, None, None)):
         if not self.use_cov:
             return super().gradient(_x, sel)
-
+        
         x = self.mkPoint(_x)
         x = jnp.asarray(x, dtype=np.float64)
+        print('grad w jax')
+        print(x, np.array(jax.grad(self.objective_jax)(x, sel), dtype=np.float64))
         return np.array(jax.grad(self.objective_jax)(x, sel), dtype=np.float64)
 
     def hessian(self, _x, sel=slice(None, None, None)):
