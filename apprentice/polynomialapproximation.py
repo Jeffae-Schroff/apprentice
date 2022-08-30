@@ -48,10 +48,8 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
             X = np.array(X, dtype=np.float64)
             Y = np.array(Y, dtype=np.float64)
             bad_data = (Y == apprentice.io.INVALID_NUMBER)
-            print('1 X: ',X, 'Y: ',Y)
             X = X[~bad_data]
             Y = Y[~bad_data]
-            print('2 X: ',X, 'Y: ',Y)
             self._m=order
             self._scaler = apprentice.Scaler(np.atleast_2d(X), a=scale_min, b=scale_max, pnames=pnames)
             self._X   = self._scaler.scaledPoints
@@ -60,7 +58,6 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
             self._trainingsize=len(X)
             if self._dim==1: self.recurrence=apprentice.monomial.recurrence1D
             else           : self.recurrence=apprentice.monomial.recurrence
-            print('3 X: ',X, 'Y: ',Y)
             self.fit(strategy=strategy, computecov=computecov)
         else:
             raise Exception("Constructor not called correctly, use either fname, initDict or X and Y")
