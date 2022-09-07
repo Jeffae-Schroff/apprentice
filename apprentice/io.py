@@ -341,27 +341,31 @@ def indexMapH5(fname, lsub):
     import h5py
     with h5py.File(fname, "r") as f: II = [x.decode() for x in f.get("index")[:]]
     # every bin name is a key, the indicies with that bin name are values
-    def temp1(fname, lsub):
-        D1 = {}
-        [D1.setdefault(bin.split('#')[0], []).append(i) for i,bin in enumerate(II)]
-        D1 = {k : np.array(D1[k]) for k in D1.keys()}
-    t1 = timeit.Timer(functools.partial(temp1, fname, lsub), 'gc.enable()') 
-    print("New code time: ", t1.timeit(1))
-    # this searches the whole index array once per element of lsub, 
-    # For the new experiment, Searching ~400,000 strings ~4,000 times is slow.
-    def temp2(fname, lsub):
-        if len(lsub) == 0: lsub = np.unique([x.split("#")[0] for x in II])
-        D2 = {ls: np.where(np.char.find(II, ls) > -1)[0] for ls in lsub}    
-    t2 = timeit.Timer(functools.partial(temp2, fname, lsub), 'gc.enable()') 
-    print("Old code time: ", t2.timeit(1))
+    
+    # def temp1(fname, lsub):
+    #     D1 = {}
+    #     [D1.setdefault(bin.split('#')[0], []).append(i) for i,bin in enumerate(II)]
+    #     D1 = {k : np.array(D1[k]) for k in D1.keys()}
+    # t1 = timeit.Timer(functools.partial(temp1, fname, lsub), 'gc.enable()') 
+    # print("New code time: ", t1.repeat(repeat = 10, number = 1))
+    # # this searches the whole index array once per element of lsub, 
+    # # For the new experiment, Searching ~400,000 strings ~4,000 times is slow.
+    # def temp2(fname, lsub):
+    #     if len(lsub) == 0: lsub = np.unique([x.split("#")[0] for x in II])
+    #     D2 = {ls: np.where(np.char.find(II, ls) > -1)[0] for ls in lsub}    
+    # t2 = timeit.Timer(functools.partial(temp2, fname, lsub), 'gc.enable()') 
+    # print("Old code time: ", t2.repeat(repeat = 10, number = 1))
 
     # print("index: ", II)
     # print("new: ", D1)
     # print("original: ", D2)
     # print("Keys equal: ", D1.keys()==D2.keys())
     # print("Values equal: ", all(np.array_equal(D1[key], D2[key]) for key in D1))
-    # return D2
-    return
+    
+    D = {}
+    [D.setdefault(bin.split('#')[0], []).append(i) for i,bin in enumerate(II)]
+    D = {k : np.array(D[k]) for k in D.keys()}
+    return D
 
 
 def readIndexH5(fname):

@@ -103,10 +103,10 @@ def vandermonde_jax(params, order):
     except:
         dim = 1
 
-    
+    print(params)
     from apprentice import tools
     if dim == 1:
-        s = jnp.array(range(order))
+        s = jnp.array(range(order+1))
     else:
         ncmax = tools.numCoeffsPoly(dim, order)
         term_list = [[0]*dim]
@@ -116,7 +116,7 @@ def vandermonde_jax(params, order):
     
     if len(params[0]) == 1:
         V = jnp.zeros((len(params), tools.numCoeffsPoly(dim, order)), dtype=jnp.float64)
-        for a, p in enumerate(params): V[a]=recurrence1D(p, s)
+        for a, p in enumerate(params): V.at[a].set(recurrence1D(p, s))
         return V
     else:
         V = jnp.power(params, s[:, jnp.newaxis])

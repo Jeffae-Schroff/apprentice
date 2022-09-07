@@ -114,7 +114,6 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         """
         Do everything
         """
-        # print('from fit:',self._Y.shape[0])
         from apprentice import tools
         n_required = tools.numCoeffsPoly(self.dim, self.m)
         if n_required > self._Y.shape[0]:
@@ -126,7 +125,7 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         self.setStructures()
 
         from apprentice import monomial
-        VM = monomial.vandermonde(self._X, self.m)
+        VM = monomial.vandermonde_jax(self._X, self.m)
         # print('x: ', self._X)
         # print('vm: \n',  VM)
         # f = open("VM_old.txt", "w")
