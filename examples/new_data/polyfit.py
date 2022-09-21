@@ -2,6 +2,7 @@ import h5py
 import numpy as np
 import jax.numpy as jnp
 from jax.config import config
+
 config.update("jax_enable_x64", True)
 config.update('jax_platform_name', 'cpu')
 from functools import partial
@@ -18,7 +19,7 @@ class Polyfit:
         order -- the order of polynomial to fit each bin with
         """
 
-        if len(kwargs.keys()) == 2:
+        if len(kwargs.keys()) == 3:
             self.input_h5 = kwargs['input_h5']
             self.order = kwargs['order']
 
@@ -36,55 +37,72 @@ class Polyfit:
             self.index = {}
             bin_ids = [x.decode() for x in f.get("index")[:]]
             [self.index.setdefault(bin.split('#')[0], []).append(i) for i,bin in enumerate(bin_ids)]
-            self.index = {k : np.array(self.index[k]) for k in self.index.keys()}
+            # self.index = {k : np.array(self.index[k]) for k in self.index.keys()}
             self.dim = len(f['params'][0])
 
-            self.pcoeff_dict = {}
+            self.fit_index = {}
             for bin_id in bin_ids:
                 bin_name, bin_number = bin_id.split('#')[0], int(bin_id.split('#')[1])
-                self.X = np.array(f['params'][:], dtype=np.float64)
-                self.Y = np.array(f['values'][self.index[bin_name][int(bin_number)]])
-                VM = self.vandermonde_jax(self.X, self.order)
-                #coeffsolve2 code
-                pcoeffs, res, rank, s  = np.linalg.lstsq(VM, self.Y, rcond=None)
-                self.pcoeff_dict[bin_id] = pcoeffs.tolist()
+                X = np.array(f['params'][:], dtype=np.float64)
+                Y = np.array(f['values'][self.index[bin_name][int(bin_number)]])
+                VM = self.vandermonde_jax(X, self.order)
+
+                #polynomialapproximation.coeffsolve2 code
+                pcoeffs, res, rank, s  = np.linalg.lstsq(VM, Y, rcond=None)
+
+                surrogate_Y = self.surrogate(X, pcoeffs)
+                chi2 = np.sum(np.divide(np.power((Y - surrogate_Y), 2), surrogate_Y))
+
+                #polynomialapproximation.fit code
+                if kwargs["computecov"]:
+                    cov = np.linalg.inv(VM.T@VM)
+                fac = res / (VM.shape[0]-VM.shape[1])
+                cov = cov*fac
+
+                bin_dict = {}
+                bin_dict['pceoffs'] = pcoeffs.tolist()
+                bin_dict['res'] = res.tolist()
+                bin_dict['chi2/ndf'] = chi2/self.numCoeffsPoly(self.dim, self.order)
+                bin_dict['cov'] = cov.tolist()
+                self.fit_index[bin_id] = bin_dict
             
-            json_dict = {'input_h5': self.input_h5, 'order': self.order, 'dim': self.dim, 'pcoeffs': self.pcoeff_dict}
+            json_dict = {'input_h5': self.input_h5, 'order': self.order, 'dim': self.dim,
+             'bin_index': self.index, 'fit_index': self.fit_index}
             with open(fit_json, 'w') as f:
                 json.dump(json_dict, f, indent = 4)
         elif len(kwargs) == 0:
+            #loads from json file into class variables
             with open(fit_json, "r") as f:
                 json_dict = json.load(f)
             self.input_h5 = json_dict['input_h5']
             self.order = json_dict['order']
             self.dim = json_dict['dim']
-            self.pcoeff_dict = {key: np.array(value) for key, value in json_dict['pcoeffs'].items()}
+            self.index = json_dict['bin_index']
+            self.fit_index = json_dict['fit_index']
         else:
             print('error in polyfit')
 
     def get_XY(self, bin_id):
-        # temp for testing
+        # probably temp for testing
         f = h5py.File(self.input_h5, "r")
         bin_name, bin_number = bin_id.split('#')[0], int(bin_id.split('#')[1])
-        self.index = {}
-        bin_ids = [x.decode() for x in f.get("index")[:]]
-        [self.index.setdefault(bin.split('#')[0], []).append(i) for i,bin in enumerate(bin_ids)]
-        self.index = {k : np.array(self.index[k]) for k in self.index.keys()}
         return np.array(f['params'][:], dtype=np.float64),np.array(f['values'][self.index[bin_name][int(bin_number)]])
 
     def get_surrogate_func(self, bin):
         """
-        Returns a surrogate that does not need
+        Returns a surrogate that does not need pceoffs as an input.
+        Returns chi2/ndf of fit and residual(s) along with this function.
         """
         if type(bin) is int:
-            return partial(self.surrogate, pcoeffs = list(self.pcoeff_dict.values())[bin])
-        return partial(self.surrogate, pcoeffs = self.pcoeff_dict[bin])
+            fit = list(self.fit_index.values())[bin]
+        else:
+            fit = self.fit_index[bin]
+        return partial(self.surrogate, pcoeffs = fit['pceoffs']), fit['res'], fit['chi2/ndf'], fit['cov']
 
     def surrogate(self, x, pcoeffs):
         """
         Takes a list/array of param sets, and returns the surrogate's estimate for their nominal values.
         The length of the highest dimension of the list/array is the number of params.
-        TODO: residuals and chi2/ndf
         """
         x = np.array(x)
         dim = x.shape[-1]
@@ -100,28 +118,30 @@ class Polyfit:
     def vandermonde_jax(self, params, order):
         """
         Construct the Vandermonde matrix.
+        If params is a 2-D array, the highest dimension indicates number of parameters.
         """
         try:
             dim = len(params[0])
         except:
             dim = 1
+        params = jnp.array(params)
 
-        #We will take params to the power of s element-wise
+        #We will take params to the power of grlex_pow element-wise
         if dim == 1:
-            s = jnp.array(range(order+1))
+            grlex_pow = jnp.array(range(order+1))
         else:
             term_list = [[0]*dim]
             for i in range(1, self.numCoeffsPoly(dim, order)):
                 term_list.append(self.mono_next_grlex(dim, term_list[-1][:]))
-            s = jnp.array(term_list)
+            grlex_pow = jnp.array(term_list)
         
-        if len(params[0]) == 1:
+        if dim == 1:
             V = jnp.zeros((len(params), self.numCoeffsPoly(dim, order)), dtype=jnp.float64)
             for a, p in enumerate(params): 
-                V = V.at[a].set(p**s)
+                V = V.at[a].set(p**grlex_pow)
             return V
         else:
-            V = jnp.power(params, s[:, jnp.newaxis])
+            V = jnp.power(params, grlex_pow[:, jnp.newaxis])
             return jnp.prod(V, axis=2).T
     def numCoeffsPoly(self, dim, order):
         """
