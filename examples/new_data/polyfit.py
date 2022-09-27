@@ -33,15 +33,16 @@ class Polyfit:
             # print(observables[0:10])
             # print(f.get("index")[0:10])
 
-            # key bin names to the array indexes(of values) with binids(in index) matching their bin
+            # key bin names to the array indexes with binids(in f.get(index)) matching that bin name
             self.index = {}
             bin_ids = [x.decode() for x in f.get("index")[:]]
-            [self.index.setdefault(bin.split('#')[0], []).append(i) for i,bin in enumerate(bin_ids)]
-            # self.index = {k : np.array(self.index[k]) for k in self.index.keys()}
+            #If key not in index yet, start a new list as its value. Append i to key's value. Strip '/' for valid filenames
+            [self.index.setdefault(bin.replace('/', '').split('#')[0], []).append(i) for i,bin in enumerate(bin_ids)]
             self.dim = len(f['params'][0])
 
             self.fit_index = {}
             for bin_id in bin_ids:
+                bin_id = bin_id.replace('/', '')
                 bin_name, bin_number = bin_id.split('#')[0], int(bin_id.split('#')[1])
                 X = np.array(f['params'][:], dtype=np.float64)
                 Y = np.array(f['values'][self.index[bin_name][int(bin_number)]])
@@ -53,25 +54,26 @@ class Polyfit:
                 surrogate_Y = self.surrogate(X, pcoeffs)
                 chi2 = np.sum(np.divide(np.power((Y - surrogate_Y), 2), surrogate_Y))
 
-                #polynomialapproximation.fit code
-                if kwargs["computecov"]:
-                    cov = np.linalg.inv(VM.T@VM)
-                fac = res / (VM.shape[0]-VM.shape[1])
-                cov = cov*fac
-
                 bin_dict = {}
                 bin_dict['pceoffs'] = pcoeffs.tolist()
                 bin_dict['res'] = res.tolist()
                 bin_dict['chi2/ndf'] = chi2/self.numCoeffsPoly(self.dim, self.order)
-                bin_dict['cov'] = cov.tolist()
+                #polynomialapproximation.fit code
+                if kwargs["computecov"]:
+                    cov = np.linalg.inv(VM.T@VM)
+                    fac = res / (VM.shape[0]-VM.shape[1])
+                    cov = cov*fac
+                    bin_dict['cov'] = cov.tolist()
+                
                 self.fit_index[bin_id] = bin_dict
             
             json_dict = {'input_h5': self.input_h5, 'order': self.order, 'dim': self.dim,
              'bin_index': self.index, 'fit_index': self.fit_index}
             with open(fit_json, 'w') as f:
                 json.dump(json_dict, f, indent = 4)
+        #loads from json file into class variables
         elif len(kwargs) == 0:
-            #loads from json file into class variables
+            
             with open(fit_json, "r") as f:
                 json_dict = json.load(f)
             self.input_h5 = json_dict['input_h5']
@@ -85,6 +87,7 @@ class Polyfit:
     def get_XY(self, bin_id):
         # probably temp for testing
         f = h5py.File(self.input_h5, "r")
+        bin_id = bin_id.replace('/', '')
         bin_name, bin_number = bin_id.split('#')[0], int(bin_id.split('#')[1])
         return np.array(f['params'][:], dtype=np.float64),np.array(f['values'][self.index[bin_name][int(bin_number)]])
 
@@ -96,7 +99,7 @@ class Polyfit:
         if type(bin) is int:
             fit = list(self.fit_index.values())[bin]
         else:
-            fit = self.fit_index[bin]
+            fit = self.fit_index[bin.replace('/', '')]
         return partial(self.surrogate, pcoeffs = fit['pceoffs']), fit['res'], fit['chi2/ndf'], fit['cov']
 
     def surrogate(self, x, pcoeffs):
