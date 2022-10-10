@@ -117,20 +117,14 @@ class PolynomialApproximation(BaseEstimator, RegressorMixin):
         from apprentice import tools
         n_required = tools.numCoeffsPoly(self.dim, self.m)
         if n_required > self._Y.shape[0]:
-            # raise Exception("Not enough inputs: got %i but require %i to do m=%i"%(self._Y.shape[0], n_required, self.m))
-            print("Not enough inputs: got %i but require %i to do m=%i"%(self._Y.shape[0], n_required, self.m))
-            
-            return
+            raise Exception("Not enough inputs: got %i but require %i to do m=%i"%(self._Y.shape[0], n_required, self.m))
+            # print("Not enough inputs: got %i but require %i to do m=%i"%(self._Y.shape[0], n_required, self.m))
+            return None
 
         self.setStructures()
 
         from apprentice import monomial
-        VM = monomial.vandermonde_jax(self._X, self.m)
-        # print('x: ', self._X)
-        # print('vm: \n',  VM)
-        # f = open("VM_old.txt", "w")
-        # f.write('x: '+ str(self._X) + '\n VM: \n'+  str(VM))
-        # f.close()
+        VM = monomial.vandermonde(self._X, self.m)
 
         strategy=kwargs["strategy"] if kwargs.get("strategy") is not None else 1
         if   strategy==1: self.coeffSolve( VM)

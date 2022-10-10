@@ -65,7 +65,11 @@ def calcApprox(X, Y, order, pnames, mode= "sip", onbtol=-1, debug=False,
     M, N = order
     import apprentice as app
     if N==0:
-        _app = app.PolynomialApproximation(X, Y, order=M, pnames=pnames, computecov=computecov)
+        try:
+            _app = app.PolynomialApproximation(X, Y, order=M, pnames=pnames, computecov=computecov)
+        except Exception as e:
+            print("Exception:", e)
+            return None, False
         hasPole=False
     else:
         if mode == "la":    _app = app.RationalApproximation(X, Y, order=(M,N), pnames=pnames, strategy=2)

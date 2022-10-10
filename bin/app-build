@@ -164,18 +164,23 @@ if __name__ == "__main__":
         temp._vmax = vmax
         temp._xmin = xmin[num]
         temp._xmax = xmax[num]
-        apps.append((temp, xmin[num], xmax[num]))
         dapps[thisBinId]= temp.asDict
+        apps.append((temp, xmin[num], xmax[num]))
         binedges[thisBinId] = (xmin[num], xmax[num])
 
-
+    print("We made it out of the for loop!")
+    print(dapps)
     DAPPS = comm.gather(dapps, root=0)
+    print("p1")
     DEDGE = comm.gather(binedges, root=0)
+    print("p2")
     t5   = time.time()
+    print("p3")
     if rank==0:
         print()
         print("Approximation calculation took {} seconds".format(t5-t4))
         sys.stdout.flush()
+        print("p4")
 
         # Store in JSON
         from collections import OrderedDict
