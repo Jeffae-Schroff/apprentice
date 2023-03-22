@@ -85,10 +85,8 @@ def readInputDataYODA(dirnames, parFileName="params.dat", wfile=None, storeAsH5=
         INDIRSLIST = [glob.glob(os.path.join(a, "*")) for a in dirnames]
         indirs     = [item for sublist in INDIRSLIST for item in sublist]
     indirs = comm.bcast(indirs, root=0)
-
     rankDirs = app.tools.chunkIt(indirs, size) if rank==0 else None
     rankDirs = comm.scatter(rankDirs, root=0)
-
     PARAMS, HISTOS = app.io.read_rundata(rankDirs, parFileName)
     send = []
     for k, v in HISTOS.items():
@@ -99,7 +97,6 @@ def readInputDataYODA(dirnames, parFileName="params.dat", wfile=None, storeAsH5=
 
     params = comm.gather(PARAMS, root=0)
     histos = comm.gather(send, root=0)
-
 
     rankIdx, binids, X, Y, E, xmin, xmax, pnames, BNAMES, data= None, None, None, None, None, None, None, None, None, None
     if rank==0:
@@ -135,11 +132,17 @@ def readInputDataYODA(dirnames, parFileName="params.dat", wfile=None, storeAsH5=
 
         _data, xmin, xmax = [], [], []
         for hn in HNAMES:
+            print(hn)
             for nb in range(hbins[hn]):
                 vals = np.array([_histos[hn][r][nb][2] if r in _histos[hn].keys() else np.nan for r in runs])
                 errs = np.array([_histos[hn][r][nb][3] if r in _histos[hn].keys() else np.nan for r in runs])
                 # Pick a run that actually exists here
-                goodrun = runs[np.where(np.isfinite(vals))[0][0]]
+                if (np.where(np.isfinite(vals))[0].size>0):
+                    goodrun = runs[np.where(np.isfinite(vals))[0][0]]
+                else:
+                    #just default to first run if all vals invalid
+                    goodrun = list(_histos[hn].keys())[0]
+                
                 xmin.append(_histos[hn][goodrun][nb][0])
                 xmax.append(_histos[hn][goodrun][nb][1])
                 USE = (~np.isinf(vals)) & (~np.isnan(vals)) & (~np.isinf(errs)) & (~np.isnan(errs))
@@ -152,12 +155,12 @@ def readInputDataYODA(dirnames, parFileName="params.dat", wfile=None, storeAsH5=
 
         if storeAsH5 is not None:
             writeInputDataSetH5(storeAsH5, _data, runs, BNAMES, pnames, xmin, xmax)
+            return
 
         # TODO add weight file reading for obsevable filtering
         observables = np.unique([x.split("#")[0] for x in BNAMES])
         im   = {ls: np.where(np.char.find(BNAMES, ls) > -1)[0] for ls in observables}
         IDX  = np.sort(np.concatenate(list(im.values())))
-
         rankIdx = app.tools.chunkIt(IDX, size)
         data = app.tools.chunkIt(_data, size)
         xmin = app.tools.chunkIt(xmin, size)
@@ -169,7 +172,6 @@ def readInputDataYODA(dirnames, parFileName="params.dat", wfile=None, storeAsH5=
     xmax = comm.scatter(xmax, root=0)
     binids = comm.scatter(binids, root=0)
     pnames = comm.bcast(pnames, root=0)
-
 
     comm.barrier()
 

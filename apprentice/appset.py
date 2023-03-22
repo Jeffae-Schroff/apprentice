@@ -453,8 +453,8 @@ class TuningObjective2(object):
         else:
             err= np.zeros_like(vals)
             egrads = np.zeros_like(grads)
-        print('grad no jax')
-        print(x, apprentice.tools.fast_grad2(self._W2[sel], self._Y[sel] - vals, E2, err, grads, egrads)[self._freeIdx])
+        # print('grad no jax')
+        # print(x, apprentice.tools.fast_grad2(self._W2[sel], self._Y[sel] - vals, E2, err, grads, egrads)[self._freeIdx])
         return apprentice.tools.fast_grad2(self._W2[sel], self._Y[sel] - vals, E2, err, grads, egrads)[self._freeIdx]
 
     def hessian(self, _x, sel=slice(None, None, None)):
@@ -790,7 +790,7 @@ class TuningObjective2(object):
         isoutside = isbelow + isabove
 
         isfixed = [i in self._fixIdx[0] for i in range(self.dim)]
-
+        print(len(self), self.dim, len(self._fixIdx[0]))
         s= ""
         s+= ("#\n#{:<{slen}}\t{:<{plen}} #    COMMENT    [ {:<{dnlen}}  ...  {:<{uplen}} ]\n#\n".format(" PNAME", " PVALUE", " PLOW", " PHIGH", slen=slen, plen=plen, uplen=uplen, dnlen=dnlen))
         for pn, val, bdn, bup, isf, isb, iso in zip(self.pnames, x_aligned, b_dn, b_up, isfixed, isbound, isoutside):
@@ -894,8 +894,8 @@ class TuningObjective3(TuningObjective2):
         
         x = self.mkPoint(_x)
         x = jnp.asarray(x, dtype=np.float64)
-        print('grad w jax')
-        print(x, np.array(jax.grad(self.objective_jax)(x, sel), dtype=np.float64))
+        # print('grad w jax')
+        # print(x, np.array(jax.grad(self.objective_jax)(x, sel), dtype=np.float64))
         return np.array(jax.grad(self.objective_jax)(x, sel), dtype=np.float64)
 
     def hessian(self, _x, sel=slice(None, None, None)):
