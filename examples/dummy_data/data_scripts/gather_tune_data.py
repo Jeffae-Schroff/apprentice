@@ -19,17 +19,18 @@ chi2 = tune_output[2].split()[2]
 place = 8
 while place < len(tune_output):
     line = tune_output[place].split()
-    params.append(line[0])
+    #weird error--apprentice makes a -> b'a'. undo here
+    print(line[0], line[0][2:-1])
+    params.append(line[0][2:-1])
     vars.append(line[1])
     #Right now will remember if any tune was ONBOUND
     is_boundary = is_boundary or (line[3] == 'ONBOUND')
     place = place + 1
-
 #if file is not created, create it and write param names on top
 dest_filepath= "../../results/many_tunes/"+filename+".csv"
 if(not os.path.exists(dest_filepath)):
     f = open(dest_filepath, "w")
-    f.write(','.join(params))
+    f.write(','.join([str(s) for s in params]))
     f.write(',ONBOUND,chi2\n')
     f.close()
 

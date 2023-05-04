@@ -342,6 +342,7 @@ if __name__ == "__main__":
     for tune_file in tune_types:
         dfs[tune_file] = pd.read_csv('results/many_tunes/'+tune_file+'.csv')
     offbound_num = 0
+    print(dfs[tune_file])
     while True:
         # print("Trying tune_" + str(offbound_num))
         for tune_file in tune_types:
